@@ -15,7 +15,10 @@ export class UsersService {
   ) {}
 
   async findUserByEmail(email: string) {
-    return this.usersRepository.findOneBy({ email });
+    return this.usersRepository.findOne({
+      where: { email },
+      relations: { roomId: true },
+    });
   }
 
   async create(createUserDto: CreateUserDto) {
