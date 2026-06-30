@@ -5,6 +5,7 @@ import { PackagesModule } from './packages/packages.module';
 import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { AuthModule } from './auth/auth.module';
+import { StudentsModule } from './students/students.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     RoomsModule,
     AuthModule,
+    StudentsModule,
   ],
   controllers: [],
   providers: [],

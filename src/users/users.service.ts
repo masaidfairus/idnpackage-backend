@@ -2,9 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EntityManager, Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { User } from '../auth/entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -17,7 +18,6 @@ export class UsersService {
   async findUserByEmail(email: string) {
     return this.usersRepository.findOne({
       where: { email },
-      relations: { roomId: true },
     });
   }
 
@@ -56,5 +56,9 @@ export class UsersService {
 
   async remove(id: number) {
     return this.usersRepository.delete(id);
+  }
+
+  async incrementTokenVersion(id: number) {
+    await this.usersRepository.increment({ id }, 'tokenVersion', 1);
   }
 }

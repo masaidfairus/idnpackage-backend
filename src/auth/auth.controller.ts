@@ -9,8 +9,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import type { AuthInput } from './auth.service';
-import { AuthGuard } from '../common/guards/auth.guard';
+import { AuthGuard } from './guards/auth.guard';
+import type { AuthInput } from './enum/auth.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -26,5 +26,12 @@ export class AuthController {
   @UseGuards(AuthGuard)
   getUserInfo(@Request() request) {
     return request.user;
+  }
+
+  @Post('logout')
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  logout(@Request() request) {
+    return this.authService.logout(request.user.userId);
   }
 }

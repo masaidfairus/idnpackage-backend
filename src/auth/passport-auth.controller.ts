@@ -1,16 +1,17 @@
 import {
-  Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
   Post,
   Request,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { PassportLocalGuard } from '../common/guards/passport-local.guard';
-import { PassportJwtGuard } from '../common/guards/passport-jwt.guard';
+import { PassportLocalGuard } from './guards/passport-local.guard';
+import { PassportJwtGuard } from './guards/passport-jwt.guard';
+import type { Response } from 'express';
 
 @Controller('auth-v2')
 export class PassportAuthController {
@@ -27,5 +28,11 @@ export class PassportAuthController {
   @UseGuards(PassportJwtGuard)
   getUserInfo(@Request() request) {
     return request.user;
+  }
+
+  @Post('logout')
+  @UseGuards(PassportJwtGuard)
+  logout(@Request() request) {
+    return this.authService.logout(request.user.userId);
   }
 }

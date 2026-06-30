@@ -2,14 +2,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Room } from '../../rooms/entities/room.entity';
 import { Package } from '../../packages/entities/package.entity';
-import { Student } from '../../students/entities/student.entity';
 
 @Entity()
-export class Room {
+export class Student {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -17,18 +18,14 @@ export class Room {
   name: string;
 
   @Column()
-  floor: string;
+  nis: string;
 
-  @OneToMany(() => Student, (student) => student.roomId)
-  students: Student[];
+  @ManyToOne(() => Room, (room) => room.students)
+  roomId: Room;
 
-  @OneToMany(() => Package, (studentPackage) => studentPackage.roomId)
+  @OneToMany(() => Package, (studentPackage) => studentPackage.studentId)
   packages: Package[];
 
   @CreateDateColumn()
   createdAt: Date;
-
-  constructor(room: Partial<Room>) {
-    Object.assign(this, room);
-  }
 }

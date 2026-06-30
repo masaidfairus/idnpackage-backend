@@ -3,19 +3,10 @@ import {
   Column,
   CreateDateColumn,
   PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { Room } from '../../rooms/entities/room.entity';
 import { Package } from '../../packages/entities/package.entity';
-
-export enum UserRole {
-  ADMIN = 'admin',
-  OPERATOR = 'operator',
-  TEACHER = 'teacher',
-  STUDENT = 'student',
-}
+import { Role } from '../../auth/enum/role.enum';
 
 @Entity()
 export class User {
@@ -33,16 +24,15 @@ export class User {
 
   @Column({
     type: 'enum',
-    enum: UserRole,
-    default: UserRole.STUDENT,
+    enum: Role,
+    default: Role.TEACHER,
   })
-  role: UserRole;
+  role: Role;
 
-  @ManyToOne(() => Room, (room) => room.users, { nullable: true })
-  @JoinColumn({ name: 'roomId' })
-  roomId: Room | null;
+  @Column({ default: 0 })
+  tokenVersion: number;
 
-  @OneToMany(() => Package, (studentPackage) => studentPackage.userId)
+  @OneToMany(() => Package, (studentPackage) => studentPackage.createdBy)
   packages: Package[];
 
   @CreateDateColumn()

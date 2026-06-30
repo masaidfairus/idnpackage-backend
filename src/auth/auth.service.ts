@@ -2,18 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-
-export type AuthInput = { email: string; password: string };
-type SignInData = {
-  userId: number;
-  roomId: number | null;
-  name: string;
-  role: string;
-};
-
-type AuthResult = SignInData & {
-  accessToken: string;
-};
+import { AuthInput, AuthResult, SignInData } from './enum/auth.enum';
 
 @Injectable()
 export class AuthService {
@@ -44,9 +33,9 @@ export class AuthService {
 
       return {
         userId: user.id,
-        roomId: user.roomId?.id ?? null,
         name: user.name,
         role: user.role,
+        tokenVersion: user.tokenVersion,
       };
     }
 
@@ -56,9 +45,9 @@ export class AuthService {
   async signIn(user: SignInData): Promise<AuthResult> {
     const tokenPayload = {
       sub: user.userId,
-      roomId: user.roomId,
       name: user.name,
       role: user.role,
+      tokenVersion: user.tokenVersion,
     };
 
     const accessToken = await this.jwtService.signAsync(tokenPayload);
@@ -66,9 +55,14 @@ export class AuthService {
     return {
       accessToken,
       userId: user.userId,
-      roomId: user.roomId,
       name: user.name,
       role: user.role,
+      tokenVersion: user.tokenVersion,
     };
+  }
+
+  async logout(userId: number) {
+    await this.usersService.incrementTokenVersion(userId);
+    return { message: 'Logged out successfully' };
   }
 }

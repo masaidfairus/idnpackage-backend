@@ -2,34 +2,27 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../auth/entities/user.entity';
 import { Room } from '../../rooms/entities/room.entity';
-
-export enum PackageLocation {
-  SECURITY = 'security_post',
-  DORM = 'dormitory_office',
-  TAKEN = 'taken',
-}
+import { Student } from '../../students/entities/student.entity';
+import { PackageLocation } from '../enum/package.enum';
 
 @Entity()
 export class Package {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.packages)
-  @JoinColumn({ name: 'ownerId' })
-  userId: User;
+  @ManyToOne(() => Student, (student) => student.packages)
+  studentId: Student;
 
   @ManyToOne(() => Room, (room) => room.packages)
-  @JoinColumn({ name: 'roomId' })
   roomId: Room;
 
-  @Column()
+  @Column({ type: 'date' })
   receivedDate: Date;
 
   @Column({
@@ -43,10 +36,13 @@ export class Package {
   pickedUpDate: Date | null;
 
   @Column({ type: 'text', nullable: true })
-  notes: string;
+  notes: string | null;
 
   @Column({ type: 'text', nullable: true })
-  photoUrl: string;
+  photoUrl: string | null;
+
+  @ManyToOne(() => User, (user) => user.packages)
+  createdBy: User;
 
   @CreateDateColumn()
   createdAt: Date;
