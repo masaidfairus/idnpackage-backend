@@ -49,8 +49,16 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    Object.assign(user, updateUserDto);
+    if (updateUserDto.password) {
+      const saltOrRounds = 10;
+      const hashedPassword = await bcrypt.hash(
+        updateUserDto.password,
+        saltOrRounds,
+      );
+      updateUserDto.password = hashedPassword;
+    }
 
+    Object.assign(user, updateUserDto);
     await this.entityManager.save(user);
   }
 

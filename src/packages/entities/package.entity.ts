@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -14,12 +15,14 @@ import { PackageLocation } from '../enum/package.enum';
 @Entity()
 export class Package {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => Student, (student) => student.packages)
+  @JoinColumn({ name: 'studentId' })
   studentId: Student;
 
   @ManyToOne(() => Room, (room) => room.packages)
+  @JoinColumn({ name: 'roomId' })
   roomId: Room;
 
   @Column({ type: 'date' })
@@ -42,6 +45,7 @@ export class Package {
   photoUrl: string | null;
 
   @ManyToOne(() => User, (user) => user.packages)
+  @JoinColumn({ name: 'createdBy' })
   createdBy: User;
 
   @CreateDateColumn()

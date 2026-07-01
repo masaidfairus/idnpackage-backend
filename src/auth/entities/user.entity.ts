@@ -11,7 +11,7 @@ import { Role } from '../../auth/enum/role.enum';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
   name: string;

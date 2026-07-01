@@ -42,7 +42,7 @@ Every response (success or error) follows a **standard shape**. Your frontend on
 
 | Header                           | When                          | Value                         |
 | -------------------------------- | ----------------------------- | ----------------------------- |
-| `Authorization: Bearer <token>`  | All `GET /me` endpoints       | JWT token from login response |
+| `Authorization: Bearer <token>`  | All protected endpoints (`/me`, `/logout`) | JWT token from login response |
 | `Content-Type: application/json` | All `POST` / `PATCH` requests | —                             |
 
 ---
@@ -70,9 +70,22 @@ Public. Returns JWT + user info.
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIs...",
   "userId": 12,
-  "roomId": 1,
   "name": "Masaid Fairus",
   "role": "student"
+}
+```
+
+---
+
+### POST `/auth/logout` — Logout (v1)
+
+Requires `Authorization: Bearer <token>` header. Invalidates the session by incrementing the user's `tokenVersion`, making all existing JWTs for that user unusable.
+
+**Response `data`:**
+
+```json
+{
+  "message": "Logged out successfully"
 }
 ```
 
@@ -87,7 +100,6 @@ Requires `Authorization: Bearer <token>` header.
 ```json
 {
   "userId": 12,
-  "roomId": 1,
   "name": "Masaid Fairus",
   "role": "student"
 }
@@ -114,9 +126,22 @@ Same as v1 but uses Passport. Same body, same response shape.
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIs...",
   "userId": 12,
-  "roomId": 1,
   "name": "Masaid Fairus",
   "role": "student"
+}
+```
+
+---
+
+### POST `/auth-v2/logout` — Logout (v2)
+
+Requires `Authorization: Bearer <token>` header. Same behavior as v1 logout.
+
+**Response `data`:**
+
+```json
+{
+  "message": "Logged out successfully"
 }
 ```
 
@@ -131,7 +156,6 @@ Requires `Authorization: Bearer <token>` header.
 ```json
 {
   "userId": 12,
-  "roomId": 1,
   "name": "Masaid Fairus",
   "role": "student"
 }
@@ -286,51 +310,109 @@ Public.
 
 ## 6. Packages
 
-> ⚠️ Packages endpoints currently return **placeholder strings only**. The service layer has not been implemented yet.
+### POST `/packages` — Create a package
 
-### POST `/packages`
+Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
 
-**Request body:** `{}` (empty, no fields defined yet)
+**Request body:**
 
-**Response `data`:**
-
-```text
-"This action adds a new package"
+```json
+{
+  "studentId": 1,
+  "roomId": 2,
+  "location": "security_post",
+  "notes": "Handle with care",
+  "photoUrl": "https://example.com/photo.jpg",
+  "createdBy": 12
+}
 ```
 
-### GET `/packages`
+| Field       | Type     | Required | Description                |
+| ----------- | -------- | -------- | -------------------------- |
+| `studentId` | number   | yes      | Student ID                 |
+| `roomId`    | number   | yes      | Room ID                    |
+| `location`  | enum     | yes      | `security_post`, `dormitory_office`, `taken` |
+| `notes`     | string   | no       | Optional notes             |
+| `photoUrl`  | string   | no       | Optional photo URL         |
+| `createdBy` | number   | yes      | Operator/teacher user ID   |
 
-**Response `data`:**
+`receivedDate` is auto-set to the current date on creation.
 
-```text
-"This action returns all packages"
+**Response `data`:** The created package object:
+
+```json
+{
+  "id": 1,
+  "studentId": { ... },
+  "roomId": { ... },
+  "receivedDate": "2026-06-14",
+  "location": "security_post",
+  "pickedUpDate": null,
+  "notes": "Handle with care",
+  "photoUrl": "https://example.com/photo.jpg",
+  "createdBy": { ... },
+  "createdAt": "2026-06-14T15:30:00.000Z",
+  "updatedAt": "2026-06-14T15:30:00.000Z"
+}
 ```
 
-### GET `/packages/:id`
+> Related entities (`studentId`, `roomId`, `createdBy`) are returned as full nested objects.
 
-**Response `data`:**
+---
 
-```text
-"This action returns a #1 package"
+### GET `/packages` — List all packages
+
+Public.
+
+**Response `data`:** Array of package objects (same shape as above).
+
+---
+
+### GET `/packages/:id` — Get a package by ID
+
+Public.
+
+**Response `data`:** Single package object or `null`.
+
+---
+
+### PATCH `/packages/:id` — Update a package
+
+Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
+
+All fields are optional. Only provided fields are updated.
+
+**Request body:**
+
+```json
+{
+  "location": "taken",
+  "pickedUpDate": "2026-06-15T10:00:00.000Z",
+  "notes": "Picked up by student"
+}
 ```
 
-### PATCH `/packages/:id`
+| Field          | Type     | Required | Description                              |
+| -------------- | -------- | -------- | ---------------------------------------- |
+| `studentId`    | number   | no       | Student ID                               |
+| `roomId`       | number   | no       | Room ID                                  |
+| `location`     | enum     | no       | `security_post`, `dormitory_office`, `taken` |
+| `notes`        | string   | no       | Optional notes                           |
+| `photoUrl`     | string   | no       | Optional photo URL                       |
+| `createdBy`    | number   | no       | Operator/teacher user ID                 |
+| `pickedUpDate` | date     | no       | Date-time when the package was picked up |
 
-**Request body:** `{}` (empty)
+> Mark a package as picked up by setting `location` to `taken` and `pickedUpDate` to the current timestamp.
 
-**Response `data`:**
+**Response `data`:** The updated package object.
 
-```text
-"This action updates a #1 package"
-```
+---
 
-### DELETE `/packages/:id`
+### DELETE `/packages/:id` — Delete a package
 
-**Response `data`:**
+Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
 
-```text
-"This action removes a #1 package"
-```
+**Response:** `data` is empty. Status code indicates success.
 
 ---
 
@@ -355,9 +437,9 @@ Public.
 ```json
 {
   "sub": 12,
-  "roomId": 1,
   "name": "Masaid Fairus",
   "role": "student",
+  "tokenVersion": 1,
   "iat": 1718370000,
   "exp": 1718456400
 }
@@ -376,12 +458,14 @@ Public.
 
 ## 10. Quick Reference Table
 
-| Method | Path             | Auth         | Body                                    |
-| ------ | ---------------- | ------------ | --------------------------------------- |
-| POST   | `/auth/login`    | —            | `{ email, password }`                   |
-| GET    | `/auth/me`       | Bearer token | —                                       |
-| POST   | `/auth-v2/login` | —            | `{ email, password }`                   |
-| GET    | `/auth-v2/me`    | Bearer token | —                                       |
+| Method | Path              | Auth         | Body                                    |
+| ------ | ----------------- | ------------ | --------------------------------------- |
+| POST   | `/auth/login`     | —            | `{ email, password }`                   |
+| GET    | `/auth/me`        | Bearer token | —                                       |
+| POST   | `/auth/logout`    | Bearer token | —                                       |
+| POST   | `/auth-v2/login`  | —            | `{ email, password }`                   |
+| GET    | `/auth-v2/me`     | Bearer token | —                                       |
+| POST   | `/auth-v2/logout` | Bearer token | —                                       |
 | POST   | `/users`         | —            | `{ name, email, password, roomId }`     |
 | GET    | `/users`         | —            | —                                       |
 | GET    | `/users/:id`     | —            | —                                       |
@@ -392,8 +476,8 @@ Public.
 | GET    | `/rooms/:id`     | —            | —                                       |
 | PATCH  | `/rooms/:id`     | —            | `{}` (stub)                             |
 | DELETE | `/rooms/:id`     | —            | —                                       |
-| POST   | `/packages`      | —            | `{}` (stub)                             |
+| POST   | `/packages`      | Bearer token + Admin/Teacher | `{ studentId, roomId, location, createdBy, notes?, photoUrl? }` |
 | GET    | `/packages`      | —            | —                                       |
 | GET    | `/packages/:id`  | —            | —                                       |
-| PATCH  | `/packages/:id`  | —            | `{}` (stub)                             |
-| DELETE | `/packages/:id`  | —            | —                                       |
+| PATCH  | `/packages/:id`  | Bearer token + Admin/Teacher | `{ studentId?, roomId?, location?, notes?, photoUrl?, createdBy?, pickedUpDate? }` |
+| DELETE | `/packages/:id`  | Bearer token + Admin/Teacher | —                                       |

@@ -1,26 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Room } from './entities/room.entity';
+import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class RoomsService {
-  create(createRoomDto: CreateRoomDto) {
-    return 'This action adds a new room';
+  constructor(
+    @InjectRepository(Room)
+    private readonly roomRepository: Repository<Room>,
+    private readonly entityManager: EntityManager,
+  ) {}
+
+  async create(createRoomDto: CreateRoomDto) {
+    const room = new Room(createRoomDto);
+    await this.entityManager.save(room);
+    return room;
   }
 
-  findAll() {
-    return `This action returns all rooms`;
+  async findAll() {
+    return this.roomRepository.find({ relations: { students: true } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} room`;
+  async findOne(id: number) {
+    return this.roomRepository.find({
+      where: { id },
+      relations: { students: true },
+    });
   }
 
-  update(id: number, updateRoomDto: UpdateRoomDto) {
-    return `This action updates a #${id} room`;
+  async update(id: number, updateRoomDto: UpdateRoomDto) {
+    const room = await this.roomRepository.findOneBy({ id });
+
+    if (!room) {
+      throw new NotFoundException(`Room with ID ${id} not found`);
+    }
+
+    Object.assign(room, updateRoomDto);
+    return this.entityManager.save(room);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} room`;
+  async remove(id: number) {
+    return this.roomRepository.delete(id);
   }
 }

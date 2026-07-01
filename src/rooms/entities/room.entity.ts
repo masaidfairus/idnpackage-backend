@@ -17,7 +17,7 @@ export class Room {
   name: string;
 
   @Column()
-  floor: string;
+  floor: number;
 
   @OneToMany(() => Student, (student) => student.roomId)
   students: Student[];

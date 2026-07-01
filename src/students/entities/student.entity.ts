@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { Room } from '../../rooms/entities/room.entity';
 import { Package } from '../../packages/entities/package.entity';
@@ -17,10 +19,11 @@ export class Student {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ unique: true })
   nis: string;
 
   @ManyToOne(() => Room, (room) => room.students)
+  @JoinColumn({ name: 'roomId' })
   roomId: Room;
 
   @OneToMany(() => Package, (studentPackage) => studentPackage.studentId)
@@ -28,4 +31,8 @@ export class Student {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  constructor(student: Partial<Student>) {
+    Object.assign(this, student);
+  }
 }
