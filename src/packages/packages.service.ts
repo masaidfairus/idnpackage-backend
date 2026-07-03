@@ -55,12 +55,25 @@ export class PackagesService {
     return newPackage;
   }
 
-  async findAll() {
-    return this.packageRepository.find();
+async findAll() {
+    return this.packageRepository.find({
+      relations: {
+        studentId: true, // Mengambil data Student yang berelasi
+        roomId: true,    // Mengambil data Room yang berelasi
+        createdBy: true, // (Opsional) Mengambil data User/Operator
+      },
+    });
   }
 
   async findOne(id: number) {
-    return this.packageRepository.findOneBy({ id });
+    return this.packageRepository.findOne({
+      where: { id },
+      relations: {
+        studentId: true,
+        roomId: true,
+        createdBy: true,
+      },
+    });
   }
 
   async update(id: number, updatePackageDto: UpdatePackageDto) {
