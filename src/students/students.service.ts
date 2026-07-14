@@ -40,7 +40,7 @@ export class StudentsService {
   }
 
   async findAll() {
-    return this.studentRepository.find();
+    return this.studentRepository.find({ relations: { roomId: true } });
   }
 
   async findOne(id: number) {
