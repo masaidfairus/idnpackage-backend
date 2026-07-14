@@ -36,6 +36,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (!user || user.tokenVersion !== payload.tokenVersion) {
         throw new UnauthorizedException();
       }
+      // Gunakan role terbaru dari DB, bukan dari payload JWT
+      return {
+        userId: payload.sub,
+        roomId: payload.roomId,
+        name: payload.name,
+        role: user.role,
+      };
     }
 
     return {
