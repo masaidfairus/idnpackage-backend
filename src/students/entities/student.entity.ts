@@ -1,3 +1,12 @@
+/**
+ * Entity Student (siswa).
+ *
+ * Relasi:
+ * - roomId -> Room (kamar siswa)
+ * - packages: satu siswa bisa punya banyak paket
+ *
+ * NIS bersifat unique.
+ */
 import {
   Column,
   CreateDateColumn,

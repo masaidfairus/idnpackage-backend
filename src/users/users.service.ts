@@ -1,3 +1,10 @@
+/**
+ * Service untuk CRUD User.
+ *
+ * Semua password di-hash dengan bcrypt (saltRounds = 10) sebelum disimpan.
+ * findUserByEmail() dipakai oleh AuthService untuk login.
+ * incrementTokenVersion() dipakai untuk logout invalidation.
+ */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -59,7 +66,7 @@ export class UsersService {
     }
 
     Object.assign(user, updateUserDto);
-    await this.entityManager.save(user);
+    return this.entityManager.save(user);
   }
 
   async remove(id: number) {

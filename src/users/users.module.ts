@@ -1,3 +1,7 @@
+/**
+ * Module Users.
+ * Mengexport UsersService agar bisa dipakai oleh AuthModule dan module lain.
+ */
 import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';

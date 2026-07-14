@@ -1,3 +1,7 @@
+/**
+ * Root module aplikasi.
+ * Mengimpor semua module fitur dan menginisialisasi konfigurasi global.
+ */
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';

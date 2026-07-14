@@ -1,3 +1,9 @@
+/**
+ * Module database menggunakan TypeORM + MySQL.
+ * Konfigurasi dibaca dari environment variables melalui ConfigService.
+ * - autoLoadEntities: true (entity otomatis terdaftar)
+ * - synchronize: true (schema auto-sync, hanya untuk development)
+ */
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';

@@ -1,3 +1,12 @@
+/**
+ * Controller CRUD untuk Room (kamar asrama).
+ *
+ * Aturan akses:
+ * - POST/PATCH/DELETE: Admin atau Teacher
+ * - GET: Publik
+ *
+ * GET /rooms dan GET /rooms/:id me-load relasi students.
+ */
 import {
   Controller,
   Get,

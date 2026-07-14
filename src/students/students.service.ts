@@ -1,3 +1,10 @@
+/**
+ * Service CRUD untuk Student.
+ *
+ * Catatan:
+ * - create() dan update() me-resolve roomId (number) ke entity Room.
+ * - update() hanya me-resolve roomId jika field tersebut dikirim.
+ */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
@@ -47,7 +54,18 @@ export class StudentsService {
       throw new NotFoundException(`Student with ID ${id} not found`);
     }
 
-    Object.assign(student, updateStudentDto);
+    const { roomId, ...studentData } = updateStudentDto;
+
+    if (roomId) {
+      const room = await this.roomRepository.findOne({ where: { id: roomId } });
+      if (!room) {
+        throw new NotFoundException(`Room with ID ${roomId} does not exist.`);
+      }
+      Object.assign(student, { ...studentData, roomId: room });
+    } else {
+      Object.assign(student, studentData);
+    }
+
     return this.entityManager.save(student);
   }
 

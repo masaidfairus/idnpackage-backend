@@ -1,3 +1,12 @@
+/**
+ * Controller CRUD untuk Package (paket/parcel).
+ *
+ * Aturan akses:
+ * - POST:   Admin atau Operator
+ * - GET:    Publik (tanpa token)
+ * - PATCH:  Admin atau Teacher
+ * - DELETE: Admin saja
+ */
 import {
   Controller,
   Get,
@@ -20,7 +29,7 @@ import { PassportJwtGuard } from '../auth/guards/passport-jwt.guard';
 export class PackagesController {
   constructor(private readonly packagesService: PackagesService) {}
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN, Role.OPERATOR)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Post()
@@ -46,7 +55,7 @@ export class PackagesController {
     return this.packagesService.update(+id, updatePackageDto);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Delete(':id')

@@ -52,6 +52,7 @@ The API starts on `http://localhost:8080` (configurable via `PORT` in `.env`).
 | `npm run start:dev`  | Start with hot-reload      |
 | `npm run build`      | Compile to `dist/`         |
 | `npm run lint`       | Run ESLint                 |
+| `npm run format`     | Run Prettier formatter     |
 | `npm run test`       | Run unit tests             |
 | `npm run test:e2e`   | Run end-to-end tests       |
 

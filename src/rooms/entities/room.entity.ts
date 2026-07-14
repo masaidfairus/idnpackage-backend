@@ -1,3 +1,10 @@
+/**
+ * Entity Room (kamar asrama).
+ *
+ * Relasi:
+ * - students: satu kamar bisa punya banyak siswa
+ * - packages: satu kamar bisa punya banyak paket
+ */
 import {
   Column,
   CreateDateColumn,

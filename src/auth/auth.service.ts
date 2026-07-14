@@ -1,3 +1,14 @@
+/**
+ * Service autentikasi.
+ *
+ * authenticate(input)  → validasi email/password, lalu signIn
+ * validateUser(input)  → cari user by email, compare bcrypt, return SignInData
+ * signIn(user)         → buat JWT payload { sub, name, role, tokenVersion }, return token + user info
+ * logout(userId)       → increment tokenVersion agar semua JWT lama invalid
+ *
+ * Token versioning: setiap login JWT baru berisi tokenVersion user saat itu.
+ * Saat logout, tokenVersion di-increment sehingga JWT lama tidak bisa dipakai lagi.
+ */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';

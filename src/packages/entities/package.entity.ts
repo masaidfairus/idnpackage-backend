@@ -1,3 +1,17 @@
+/**
+ * Entity Package (paket/parcel siswa).
+ *
+ * Relasi:
+ * - studentId -> Student (siswa penerima)
+ * - roomId    -> Room (kamarnya)
+ * - createdBy -> User (operator/admin yang mencatat)
+ *
+ * Lifecycle location:
+ *   security_post -> dormitory_office -> taken
+ *
+ * receivedDate di-set manual saat create.
+ * pickedUpDate di-set manual saat location = 'taken'.
+ */
 import {
   Column,
   CreateDateColumn,

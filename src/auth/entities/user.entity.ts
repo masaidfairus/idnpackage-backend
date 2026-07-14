@@ -1,3 +1,14 @@
+/**
+ * Entity User (system user).
+ *
+ * Relasi:
+ * - packages: satu user dapat membuat banyak package (sebagai operator/createdBy)
+ *
+ * Catatan:
+ * - tokenVersion digunakan untuk logout invalidation (setiap login JWT baru
+ *   membekukan tokenVersion saat itu; increment = semua JWT lama invalid).
+ * - Role default: TEACHER.
+ */
 import {
   Entity,
   Column,

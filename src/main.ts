@@ -1,3 +1,11 @@
+/**
+ * Entry point aplikasi NestJS.
+ * - Mengaktifkan CORS
+ * - Global ValidationPipe (whitelist + forbidNonWhitelisted)
+ * - Global TransformInterceptor (membungkus response ke format { success, statusCode, message, data, timestamp })
+ * - Global HttpExceptionFilter (menangani error terstruktur)
+ * - Port default 3000 jika env PORT tidak diset
+ */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -23,4 +31,3 @@ async function bootstrap() {
   await app.listen(port, '0.0.0.0');
 }
 bootstrap();
-  

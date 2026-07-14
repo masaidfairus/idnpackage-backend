@@ -1,3 +1,10 @@
+/**
+ * Service CRUD untuk Room.
+ *
+ * Catatan:
+ * - findAll() dan findOne() me-load relasi students.
+ * - update() menggunakan entityManager.save agar relasi ikut tersimpan.
+ */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -24,7 +31,7 @@ export class RoomsService {
   }
 
   async findOne(id: number) {
-    return this.roomRepository.find({
+    return this.roomRepository.findOne({
       where: { id },
       relations: { students: true },
     });

@@ -1,3 +1,9 @@
+/**
+ * Global exception filter.
+ * Menangkap semua exception (HttpException dan unknown) dan mengembalikan
+ * response error terstruktur: { success, statusCode, message, data: null, timestamp }.
+ * Error messages dari validation pipes (array) diambil elemen pertamanya saja.
+ */
 import {
   ArgumentsHost,
   Catch,

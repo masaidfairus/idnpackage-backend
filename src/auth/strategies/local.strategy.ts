@@ -1,3 +1,7 @@
+/**
+ * Passport Local Strategy untuk login via email + password.
+ * Menggunakan field 'email' sebagai username (default passport-local adalah 'username').
+ */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';

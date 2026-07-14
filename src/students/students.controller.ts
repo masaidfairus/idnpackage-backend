@@ -1,3 +1,13 @@
+/**
+ * Controller CRUD untuk Student (siswa).
+ *
+ * Aturan akses:
+ * - POST/PATCH/DELETE: Admin atau Teacher
+ * - GET: Publik
+ *
+ * Setiap student terhubung ke satu Room.
+ * NIS bersifat unique.
+ */
 import {
   Controller,
   Get,

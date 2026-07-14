@@ -1,3 +1,10 @@
+/**
+ * Global response interceptor.
+ * Membungkus semua response sukses ke format:
+ * { success: true, statusCode, message, data, timestamp }.
+ * - Jika handler mengembalikan { data, message }, maka `data.data` diekstrak dan `message` dipakai.
+ * - Jika handler mengembalikan objek biasa, seluruhnya menjadi `data`.
+ */
 import {
   CallHandler,
   ExecutionContext,

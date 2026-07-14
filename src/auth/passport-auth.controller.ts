@@ -1,3 +1,12 @@
+/**
+ * Auth controller versi 2 (Passport.js).
+ * Input/output identik dengan v1, hanya implementation detail yang berbeda.
+ *
+ * Endpoints:
+ * - POST /auth-v2/login  — publik, guard: PassportLocalGuard
+ * - GET  /auth-v2/me     — perlu token, guard: PassportJwtGuard
+ * - POST /auth-v2/logout — perlu token, guard: PassportJwtGuard
+ */
 import {
   Controller,
   Get,

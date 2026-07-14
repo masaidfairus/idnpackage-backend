@@ -42,7 +42,7 @@ Every response (success or error) follows a **standard shape**. Your frontend on
 
 | Header                           | When                          | Value                         |
 | -------------------------------- | ----------------------------- | ----------------------------- |
-| `Authorization: Bearer <token>`  | All protected endpoints (`/me`, `/logout`) | JWT token from login response |
+| `Authorization: Bearer <token>`  | All protected endpoints       | JWT token from login response |
 | `Content-Type: application/json` | All `POST` / `PATCH` requests | —                             |
 
 ---
@@ -71,7 +71,8 @@ Public. Returns JWT + user info.
   "accessToken": "eyJhbGciOiJIUzI1NiIs...",
   "userId": 12,
   "name": "Masaid Fairus",
-  "role": "student"
+  "role": "admin",
+  "tokenVersion": 1
 }
 ```
 
@@ -101,7 +102,8 @@ Requires `Authorization: Bearer <token>` header.
 {
   "userId": 12,
   "name": "Masaid Fairus",
-  "role": "student"
+  "role": "admin",
+  "tokenVersion": 1
 }
 ```
 
@@ -127,7 +129,8 @@ Same as v1 but uses Passport. Same body, same response shape.
   "accessToken": "eyJhbGciOiJIUzI1NiIs...",
   "userId": 12,
   "name": "Masaid Fairus",
-  "role": "student"
+  "role": "admin",
+  "tokenVersion": 1
 }
 ```
 
@@ -157,7 +160,8 @@ Requires `Authorization: Bearer <token>` header.
 {
   "userId": 12,
   "name": "Masaid Fairus",
-  "role": "student"
+  "role": "admin",
+  "tokenVersion": 1
 }
 ```
 
@@ -171,7 +175,7 @@ Requires `Authorization: Bearer <token>` header.
 
 ### POST `/users` — Create user
 
-Public. Creates a user with hashed password.
+Requires `Authorization: Bearer <token>` header and role `admin`.
 
 **Request body:**
 
@@ -180,9 +184,16 @@ Public. Creates a user with hashed password.
   "name": "Masaid Fairus",
   "email": "masaid@example.com",
   "password": "secret123",
-  "roomId": 1
+  "role": "admin"
 }
 ```
+
+| Field      | Type     | Required | Description                                      |
+| ---------- | -------- | -------- | ------------------------------------------------ |
+| `name`     | string   | yes      | User's full name                                 |
+| `email`    | string   | yes      | User's email (unique)                            |
+| `password` | string   | yes      | Plain-text password (bcrypt-hashed before store) |
+| `role`     | enum     | no       | `admin`, `operator`, `teacher` (default: `teacher`) |
 
 **Response `data`:** The created user object:
 
@@ -192,13 +203,11 @@ Public. Creates a user with hashed password.
   "name": "Masaid Fairus",
   "email": "masaid@example.com",
   "password": "$2b$10$...",
-  "role": "student",
-  "roomId": 1,
+  "role": "admin",
+  "tokenVersion": 0,
   "createdAt": "2026-06-14T15:30:00.000Z"
 }
 ```
-
-> ⚠️ `password` is bcrypt-hashed. `roomId` contains the numeric FK, but when loaded via the relation it may return the full `Room` object.
 
 ---
 
@@ -214,8 +223,8 @@ Public.
     "id": 12,
     "name": "Masaid Fairus",
     "email": "masaid@example.com",
-    "role": "student",
-    "roomId": 1,
+    "role": "admin",
+    "tokenVersion": 0,
     "createdAt": "2026-06-14T15:30:00.000Z"
   }
 ]
@@ -233,7 +242,7 @@ Public.
 
 ### PATCH `/users/:id` — Update user
 
-Public. All fields optional.
+Requires `Authorization: Bearer <token>` header and role `admin`. All fields optional.
 
 **Request body:** (any subset)
 
@@ -242,77 +251,189 @@ Public. All fields optional.
   "name": "Updated Name",
   "email": "newemail@example.com",
   "password": "newPassword",
-  "roomId": 2
+  "role": "operator"
 }
 ```
 
-**Response:** `data` is empty (204-like). Status code indicates success.
+**Response `data`:** The updated user object.
 
 ---
 
 ### DELETE `/users/:id` — Delete user
 
-Public.
+Requires `Authorization: Bearer <token>` header and role `admin`.
 
-**Response:** `data` is empty.
+**Response `data`:** The delete result object.
 
 ---
 
 ## 5. Rooms
 
-> ⚠️ Rooms endpoints currently return **placeholder strings only**. The service layer has not been implemented yet.
+---
 
 ### POST `/rooms`
 
-**Request body:** `{}` (empty, no fields defined yet)
+Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
 
-**Response `data`:**
+**Request body:**
 
-```text
-"This action adds a new room"
+```json
+{
+  "name": "A101",
+  "floor": 1
+}
 ```
 
-### GET `/rooms`
+| Field   | Type   | Required | Description       |
+| ------- | ------ | -------- | ----------------- |
+| `name`  | string | yes      | Room name/number  |
+| `floor` | number | yes      | Floor number      |
 
-**Response `data`:**
+**Response `data`:** The created room object:
 
-```text
-"This action returns all rooms"
-```
-
-### GET `/rooms/:id`
-
-**Response `data`:**
-
-```text
-"This action returns a #1 room"
-```
-
-### PATCH `/rooms/:id`
-
-**Request body:** `{}` (empty)
-
-**Response `data`:**
-
-```text
-"This action updates a #1 room"
-```
-
-### DELETE `/rooms/:id`
-
-**Response `data`:**
-
-```text
-"This action removes a #1 room"
+```json
+{
+  "id": 1,
+  "name": "A101",
+  "floor": 1,
+  "createdAt": "2026-06-14T15:30:00.000Z"
+}
 ```
 
 ---
 
-## 6. Packages
+### GET `/rooms`
+
+Public.
+
+**Response `data`:** Array of room objects (each includes `students` relation).
+
+---
+
+### GET `/rooms/:id`
+
+Public.
+
+**Response `data`:** Single room object with `students` relation, or `null`.
+
+---
+
+### PATCH `/rooms/:id`
+
+Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
+
+**Request body:** (any subset)
+
+```json
+{
+  "name": "A102",
+  "floor": 2
+}
+```
+
+**Response `data`:** The updated room object.
+
+---
+
+### DELETE `/rooms/:id`
+
+Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
+
+**Response `data`:** The delete result object.
+
+---
+
+## 6. Students
+
+---
+
+### POST `/students`
+
+Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
+
+**Request body:**
+
+```json
+{
+  "name": "Budi Santoso",
+  "nis": "1234567890",
+  "roomId": 1
+}
+```
+
+| Field    | Type   | Required | Description             |
+| -------- | ------ | -------- | ----------------------- |
+| `name`   | string | yes      | Student's full name     |
+| `nis`    | string | yes      | Student NIS (unique)    |
+| `roomId` | number | yes      | ID of the student's room |
+
+**Response `data`:** The created student object:
+
+```json
+{
+  "id": 1,
+  "name": "Budi Santoso",
+  "nis": "1234567890",
+  "roomId": { ... },
+  "createdAt": "2026-06-14T15:30:00.000Z"
+}
+```
+
+> `roomId` is returned as a full nested Room object.
+
+---
+
+### GET `/students`
+
+Public.
+
+**Response `data`:** Array of student objects.
+
+---
+
+### GET `/students/:id`
+
+Public.
+
+**Response `data`:** Single student object or `null`.
+
+---
+
+### PATCH `/students/:id`
+
+Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
+
+All fields optional. Only provided fields are updated.
+
+**Request body:** (any subset)
+
+```json
+{
+  "name": "Updated Name",
+  "nis": "0987654321",
+  "roomId": 2
+}
+```
+
+**Response `data`:** The updated student object.
+
+---
+
+### DELETE `/students/:id`
+
+Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
+
+**Response `data`:** The delete result object.
+
+---
+
+## 7. Packages
+
+---
 
 ### POST `/packages` — Create a package
 
-Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
+Requires `Authorization: Bearer <token>` header and role `admin` or `operator`.
 
 **Request body:**
 
@@ -334,7 +455,7 @@ Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
 | `location`  | enum     | yes      | `security_post`, `dormitory_office`, `taken` |
 | `notes`     | string   | no       | Optional notes             |
 | `photoUrl`  | string   | no       | Optional photo URL         |
-| `createdBy` | number   | yes      | Operator/teacher user ID   |
+| `createdBy` | number   | yes      | Operator/user ID           |
 
 `receivedDate` is auto-set to the current date on creation.
 
@@ -364,7 +485,7 @@ Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
 
 Public.
 
-**Response `data`:** Array of package objects (same shape as above).
+**Response `data`:** Array of package objects (same shape as above, with relations populated).
 
 ---
 
@@ -372,7 +493,7 @@ Public.
 
 Public.
 
-**Response `data`:** Single package object or `null`.
+**Response `data`:** Single package object (with relations populated) or `null`.
 
 ---
 
@@ -399,7 +520,7 @@ All fields are optional. Only provided fields are updated.
 | `location`     | enum     | no       | `security_post`, `dormitory_office`, `taken` |
 | `notes`        | string   | no       | Optional notes                           |
 | `photoUrl`     | string   | no       | Optional photo URL                       |
-| `createdBy`    | number   | no       | Operator/teacher user ID                 |
+| `createdBy`    | number   | no       | Operator/user ID                         |
 | `pickedUpDate` | date     | no       | Date-time when the package was picked up |
 
 > Mark a package as picked up by setting `location` to `taken` and `pickedUpDate` to the current timestamp.
@@ -410,13 +531,13 @@ All fields are optional. Only provided fields are updated.
 
 ### DELETE `/packages/:id` — Delete a package
 
-Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
+Requires `Authorization: Bearer <token>` header and role `admin`.
 
-**Response:** `data` is empty. Status code indicates success.
+**Response `data`:** The delete result object.
 
 ---
 
-## 7. Error Scenarios
+## 8. Error Scenarios
 
 | Scenario             | Status | Example `message`                                        |
 | -------------------- | ------ | -------------------------------------------------------- |
@@ -428,7 +549,7 @@ Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
 
 ---
 
-## 8. JWT Token Info
+## 9. JWT Token Info
 
 - **Algorithm:** HS256
 - **Expires:** 1 day
@@ -438,7 +559,7 @@ Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
 {
   "sub": 12,
   "name": "Masaid Fairus",
-  "role": "student",
+  "role": "admin",
   "tokenVersion": 1,
   "iat": 1718370000,
   "exp": 1718456400
@@ -447,37 +568,42 @@ Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
 
 ---
 
-## 9. Enums
+## 10. Enums
 
 | Enum              | Values                                       |
 | ----------------- | -------------------------------------------- |
-| `UserRole`        | `admin`, `operator`, `teacher`, `student`    |
+| `UserRole`        | `admin`, `operator`, `teacher`               |
 | `PackageLocation` | `security_post`, `dormitory_office`, `taken` |
 
 ---
 
-## 10. Quick Reference Table
+## 11. Quick Reference Table
 
-| Method | Path              | Auth         | Body                                    |
-| ------ | ----------------- | ------------ | --------------------------------------- |
-| POST   | `/auth/login`     | —            | `{ email, password }`                   |
-| GET    | `/auth/me`        | Bearer token | —                                       |
-| POST   | `/auth/logout`    | Bearer token | —                                       |
-| POST   | `/auth-v2/login`  | —            | `{ email, password }`                   |
-| GET    | `/auth-v2/me`     | Bearer token | —                                       |
-| POST   | `/auth-v2/logout` | Bearer token | —                                       |
-| POST   | `/users`         | —            | `{ name, email, password, roomId }`     |
-| GET    | `/users`         | —            | —                                       |
-| GET    | `/users/:id`     | —            | —                                       |
-| PATCH  | `/users/:id`     | —            | `{ name?, email?, password?, roomId? }` |
-| DELETE | `/users/:id`     | —            | —                                       |
-| POST   | `/rooms`         | —            | `{}` (stub)                             |
-| GET    | `/rooms`         | —            | —                                       |
-| GET    | `/rooms/:id`     | —            | —                                       |
-| PATCH  | `/rooms/:id`     | —            | `{}` (stub)                             |
-| DELETE | `/rooms/:id`     | —            | —                                       |
-| POST   | `/packages`      | Bearer token + Admin/Teacher | `{ studentId, roomId, location, createdBy, notes?, photoUrl? }` |
-| GET    | `/packages`      | —            | —                                       |
-| GET    | `/packages/:id`  | —            | —                                       |
-| PATCH  | `/packages/:id`  | Bearer token + Admin/Teacher | `{ studentId?, roomId?, location?, notes?, photoUrl?, createdBy?, pickedUpDate? }` |
-| DELETE | `/packages/:id`  | Bearer token + Admin/Teacher | —                                       |
+| Method | Path              | Auth                    | Body                                    |
+| ------ | ----------------- | ----------------------- | --------------------------------------- |
+| POST   | `/auth/login`     | —                       | `{ email, password }`                   |
+| GET    | `/auth/me`        | Bearer token            | —                                       |
+| POST   | `/auth/logout`    | Bearer token            | —                                       |
+| POST   | `/auth-v2/login`  | —                       | `{ email, password }`                   |
+| GET    | `/auth-v2/me`     | Bearer token            | —                                       |
+| POST   | `/auth-v2/logout` | Bearer token            | —                                       |
+| POST   | `/users`          | Bearer + Admin          | `{ name, email, password, role? }`      |
+| GET    | `/users`          | —                       | —                                       |
+| GET    | `/users/:id`      | —                       | —                                       |
+| PATCH  | `/users/:id`      | Bearer + Admin          | `{ name?, email?, password?, role? }`   |
+| DELETE | `/users/:id`      | Bearer + Admin          | —                                       |
+| POST   | `/rooms`          | Bearer + Admin/Teacher  | `{ name, floor }`                       |
+| GET    | `/rooms`          | —                       | —                                       |
+| GET    | `/rooms/:id`      | —                       | —                                       |
+| PATCH  | `/rooms/:id`      | Bearer + Admin/Teacher  | `{ name?, floor? }`                     |
+| DELETE | `/rooms/:id`      | Bearer + Admin/Teacher  | —                                       |
+| POST   | `/students`       | Bearer + Admin/Teacher  | `{ name, nis, roomId }`                 |
+| GET    | `/students`       | —                       | —                                       |
+| GET    | `/students/:id`   | —                       | —                                       |
+| PATCH  | `/students/:id`   | Bearer + Admin/Teacher  | `{ name?, nis?, roomId? }`              |
+| DELETE | `/students/:id`   | Bearer + Admin/Teacher  | —                                       |
+| POST   | `/packages`       | Bearer + Admin/Operator | `{ studentId, roomId, location, createdBy, notes?, photoUrl? }` |
+| GET    | `/packages`       | —                       | —                                       |
+| GET    | `/packages/:id`   | —                       | —                                       |
+| PATCH  | `/packages/:id`   | Bearer + Admin/Teacher  | `{ studentId?, roomId?, location?, notes?, photoUrl?, createdBy?, pickedUpDate? }` |
+| DELETE | `/packages/:id`   | Bearer + Admin          | —                                       |

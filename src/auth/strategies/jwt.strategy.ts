@@ -1,3 +1,10 @@
+/**
+ * Passport JWT Strategy.
+ *
+ * Ekstrak token dari header Authorization Bearer.
+ * Validasi tokenVersion: jika user sudah logout (tokenVersion di-increment),
+ * JWT lama akan ditolak meskipun belum expired.
+ */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';

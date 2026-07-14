@@ -1,3 +1,11 @@
+/**
+ * Auth controller versi 1 (custom AuthGuard).
+ *
+ * Endpoints:
+ * - POST /auth/login  — publik, mengembalikan JWT
+ * - GET  /auth/me     — perlu token, mengembalikan info user dari token
+ * - POST /auth/logout — perlu token, invalidasi session via tokenVersion
+ */
 import {
   Body,
   Controller,

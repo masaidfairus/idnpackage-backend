@@ -1,3 +1,11 @@
+/**
+ * Custom AuthGuard (v1) — verifikasi JWT manual tanpa Passport.
+ *
+ * - Ekstrak token dari header Authorization
+ * - Verifikasi dengan JwtService
+ * - Cek tokenVersion untuk deteksi logout
+ * - Set request.user dengan data dari token
+ */
 import {
   CanActivate,
   ExecutionContext,

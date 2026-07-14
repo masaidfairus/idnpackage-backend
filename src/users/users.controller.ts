@@ -1,3 +1,11 @@
+/**
+ * Controller CRUD untuk Users.
+ *
+ * Hanya admin yang bisa create/update/delete user.
+ * GET /users dan GET /users/:id bersifat publik (tanpa auth).
+ *
+ * Semua password di-hash dengan bcrypt sebelum disimpan.
+ */
 import {
   Controller,
   Get,
@@ -20,7 +28,7 @@ import { RolesGuard } from '../auth/guards/roles/roles.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Post()
@@ -38,7 +46,7 @@ export class UsersController {
     return this.usersService.findOne(+id);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Patch(':id')
@@ -46,11 +54,11 @@ export class UsersController {
     return this.usersService.update(+id, updateUserDto);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    await this.usersService.remove(+id);
+    return this.usersService.remove(+id);
   }
 }
