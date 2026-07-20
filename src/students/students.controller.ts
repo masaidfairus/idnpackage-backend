@@ -20,6 +20,7 @@ import {
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
+import { CreateBulkStudentDto } from './dto/create-bulk-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { RolesGuard } from '../auth/guards/roles/roles.guard';
 import { PassportJwtGuard } from '../auth/guards/passport-jwt.guard';
@@ -36,6 +37,14 @@ export class StudentsController {
   @Post()
   async create(@Body() createStudentDto: CreateStudentDto) {
     return this.studentsService.create(createStudentDto);
+  }
+
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @UseGuards(RolesGuard)
+  @UseGuards(PassportJwtGuard)
+  @Post('bulk')
+  async bulkCreate(@Body() createBulkDto: CreateBulkStudentDto) {
+    return this.studentsService.bulkCreate(createBulkDto);
   }
 
   @Get()
