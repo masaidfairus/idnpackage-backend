@@ -25,11 +25,17 @@ import { RolesGuard } from '../auth/guards/roles/roles.guard';
 import { PassportJwtGuard } from '../auth/guards/passport-jwt.guard';
 import { Role } from '../auth/enum/role.enum';
 
+/** Kelas RoomsController mengelola request HTTP masuk. */
 @Controller('rooms')
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  /**
+     * Membuat data baru melalui operasi create.
+     * @param createRoomDto Parameter input.
+     * @returns Hasil dari operasi create.
+     */
+    @Roles(Role.ADMIN, Role.TEACHER)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Post()
@@ -37,17 +43,32 @@ export class RoomsController {
     return this.roomsService.create(createRoomDto);
   }
 
-  @Get()
+  /**
+     * Mengambil data melalui operasi findAll.
+     * @returns Hasil dari operasi findAll.
+     */
+    @Get()
   findAll() {
     return this.roomsService.findAll();
   }
 
-  @Get(':id')
+  /**
+     * Mengambil data melalui operasi findOne.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi findOne.
+     */
+    @Get(':id')
   findOne(@Param('id') id: string) {
     return this.roomsService.findOne(+id);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  /**
+     * Memperbarui data melalui operasi update.
+     * @param id Parameter input.
+     * @param updateRoomDto Parameter input.
+     * @returns Hasil dari operasi update.
+     */
+    @Roles(Role.ADMIN, Role.TEACHER)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Patch(':id')
@@ -55,7 +76,12 @@ export class RoomsController {
     return this.roomsService.update(+id, updateRoomDto);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  /**
+     * Menghapus data melalui operasi remove.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi remove.
+     */
+    @Roles(Role.ADMIN, Role.TEACHER)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Delete(':id')

@@ -22,41 +22,52 @@ import { Package } from '../../packages/entities/package.entity';
 import { Room } from '../../rooms/entities/room.entity';
 import { Role } from '../../auth/enum/role.enum';
 
+/** Kelas User adalah entitas database. */
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
+  /** Properti id dengan tipe number. */
+    @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  /** Properti name dengan tipe string. */
+    @Column()
   name: string;
 
-  @Column({ unique: true })
+  /** Properti email dengan tipe string. */
+    @Column({ unique: true })
   email: string;
 
-  @Column()
+  /** Properti password dengan tipe string. */
+    @Column()
   password: string;
 
-  @Column({
+  /** Properti role dengan tipe import("E:/Main/Code/idnpackage-backend/src/auth/enum/role.enum").Role. */
+    @Column({
     type: 'enum',
     enum: Role,
     default: Role.TEACHER,
   })
   role: Role;
 
-  @Column({ default: 0 })
+  /** Properti tokenVersion dengan tipe number. */
+    @Column({ default: 0 })
   tokenVersion: number;
 
-  @OneToMany(() => Package, (studentPackage) => studentPackage.createdBy)
+  /** Properti packages dengan tipe import("E:/Main/Code/idnpackage-backend/src/packages/entities/package.entity").Package[]. */
+    @OneToMany(() => Package, (studentPackage) => studentPackage.createdBy)
   packages: Package[];
 
-  @ManyToOne(() => Room, { nullable: true })
+  /** Properti room dengan tipe import("E:/Main/Code/idnpackage-backend/src/rooms/entities/room.entity").Room | null. */
+    @ManyToOne(() => Room, { nullable: true })
   @JoinColumn({ name: 'roomId' })
   room: Room | null;
 
-  @Column({ nullable: true })
+  /** Properti roomId dengan tipe number | null. */
+    @Column({ nullable: true })
   roomId: number | null;
 
-  @CreateDateColumn()
+  /** Properti createdAt dengan tipe Date. */
+    @CreateDateColumn()
   createdAt: Date;
 
   constructor(user: Partial<User>) {

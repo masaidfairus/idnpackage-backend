@@ -15,6 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../auth/entities/user.entity';
 import { Room } from '../rooms/entities/room.entity';
 
+/** Kelas UsersService menangani logika bisnis. */
 @Injectable()
 export class UsersService {
   constructor(
@@ -25,14 +26,24 @@ export class UsersService {
     private readonly entityManager: EntityManager,
   ) {}
 
-  async findUserByEmail(email: string) {
+  /**
+     * Mengeksekusi operasi findUserByEmail.
+     * @param email Parameter input.
+     * @returns Hasil dari operasi findUserByEmail.
+     */
+    async findUserByEmail(email: string) {
     return this.usersRepository.findOne({
       where: { email },
       relations: { room: true },
     });
   }
 
-  async create(createUserDto: CreateUserDto) {
+  /**
+     * Mengeksekusi operasi create.
+     * @param createUserDto Parameter input.
+     * @returns Hasil dari operasi create.
+     */
+    async create(createUserDto: CreateUserDto) {
     const saltOrRounds = 10;
     const hashedPassword = await bcrypt.hash(
       createUserDto.password,
@@ -52,18 +63,33 @@ export class UsersService {
     return user;
   }
 
-  async findAll() {
+  /**
+     * Mengeksekusi operasi findAll.
+     * @returns Hasil dari operasi findAll.
+     */
+    async findAll() {
     return this.usersRepository.find({ relations: { room: true } });
   }
 
-  async findOne(id: number) {
+  /**
+     * Mengeksekusi operasi findOne.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi findOne.
+     */
+    async findOne(id: number) {
     return this.usersRepository.findOne({
       where: { id },
       relations: { room: true },
     });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  /**
+     * Mengeksekusi operasi update.
+     * @param id Parameter input.
+     * @param updateUserDto Parameter input.
+     * @returns Hasil dari operasi update.
+     */
+    async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) {
@@ -95,11 +121,21 @@ export class UsersService {
     return this.entityManager.save(user);
   }
 
-  async remove(id: number) {
+  /**
+     * Mengeksekusi operasi remove.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi remove.
+     */
+    async remove(id: number) {
     return this.usersRepository.delete(id);
   }
 
-  async incrementTokenVersion(id: number) {
+  /**
+     * Mengeksekusi operasi incrementTokenVersion.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi incrementTokenVersion.
+     */
+    async incrementTokenVersion(id: number) {
     await this.usersRepository.increment({ id }, 'tokenVersion', 1);
   }
 }

@@ -8,23 +8,29 @@ import {
 } from 'class-validator';
 import { Role } from '../../auth/enum/role.enum';
 
+/** Kelas CreateUserDto. */
 export class CreateUserDto {
-  @IsString()
+  /** Properti name dengan tipe string. */
+    @IsString()
   @IsNotEmpty()
   name!: string;
 
-  @IsEmail()
+  /** Properti email dengan tipe string. */
+    @IsEmail()
   @IsNotEmpty()
   email!: string;
 
-  @IsString()
+  /** Properti password dengan tipe string. */
+    @IsString()
   @IsNotEmpty()
   password!: string;
 
-  @IsEnum(Role)
+  /** Properti role dengan tipe import("E:/Main/Code/idnpackage-backend/src/auth/enum/role.enum").Role | undefined. */
+    @IsEnum(Role)
   role?: Role;
 
-  @IsOptional()
+  /** Properti roomId dengan tipe number | null | undefined. */
+    @IsOptional()
   @IsNumber()
   roomId?: number | null;
 }

@@ -11,6 +11,7 @@ import { RoomsModule } from './rooms/rooms.module';
 import { AuthModule } from './auth/auth.module';
 import { StudentsModule } from './students/students.module';
 
+/** Kelas AppModule adalah modul fitur. */
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),

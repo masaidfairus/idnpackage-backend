@@ -12,6 +12,7 @@ import { Student } from '../students/entities/student.entity';
 import { Room } from '../rooms/entities/room.entity';
 import { User } from '../auth/entities/user.entity';
 
+/** Kelas PackagesModule adalah modul fitur. */
 @Module({
   imports: [TypeOrmModule.forFeature([Package, Student, Room, User])],
   controllers: [PackagesController],

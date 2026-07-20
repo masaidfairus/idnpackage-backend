@@ -1,11 +1,14 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
+/** Kelas CreateRoomDto. */
 export class CreateRoomDto {
-  @IsString()
+  /** Properti name dengan tipe string. */
+    @IsString()
   @IsNotEmpty()
   name!: string;
 
-  @IsNumber()
+  /** Properti floor dengan tipe number. */
+    @IsNumber()
   @IsNotEmpty()
   floor!: number;
 }

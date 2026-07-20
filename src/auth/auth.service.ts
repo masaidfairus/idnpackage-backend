@@ -15,6 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { AuthInput, AuthResult, SignInData } from './enum/auth.enum';
 
+/** Kelas AuthService menangani logika bisnis. */
 @Injectable()
 export class AuthService {
   constructor(
@@ -22,7 +23,12 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async authenticate(input: AuthInput): Promise<AuthResult> {
+  /**
+     * Mengeksekusi operasi authenticate.
+     * @param input Parameter input.
+     * @returns Hasil dari operasi authenticate.
+     */
+    async authenticate(input: AuthInput): Promise<AuthResult> {
     const user = await this.validateUser(input);
 
     if (!user) {
@@ -32,7 +38,12 @@ export class AuthService {
     return this.signIn(user);
   }
 
-  async validateUser(input: AuthInput): Promise<SignInData | null> {
+  /**
+     * Mengeksekusi operasi validateUser.
+     * @param input Parameter input.
+     * @returns Hasil dari operasi validateUser.
+     */
+    async validateUser(input: AuthInput): Promise<SignInData | null> {
     const user = await this.usersService.findUserByEmail(input.email);
 
     if (user) {
@@ -54,7 +65,12 @@ export class AuthService {
     return null;
   }
 
-  async signIn(user: SignInData): Promise<AuthResult> {
+  /**
+     * Mengeksekusi operasi signIn.
+     * @param user Parameter input.
+     * @returns Hasil dari operasi signIn.
+     */
+    async signIn(user: SignInData): Promise<AuthResult> {
     const tokenPayload = {
       sub: user.userId,
       name: user.name,
@@ -77,7 +93,12 @@ export class AuthService {
     };
   }
 
-  async logout(userId: number) {
+  /**
+     * Mengeksekusi operasi logout.
+     * @param userId Parameter input.
+     * @returns Hasil dari operasi logout.
+     */
+    async logout(userId: number) {
     await this.usersService.incrementTokenVersion(userId);
     return { message: 'Logged out successfully' };
   }

@@ -25,11 +25,17 @@ import { Roles } from '../auth/decorator/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles/roles.guard';
 import { PassportJwtGuard } from '../auth/guards/passport-jwt.guard';
 
+/** Kelas PackagesController mengelola request HTTP masuk. */
 @Controller('packages')
 export class PackagesController {
   constructor(private readonly packagesService: PackagesService) {}
 
-  @Roles(Role.ADMIN, Role.OPERATOR)
+  /**
+     * Membuat data baru melalui operasi create.
+     * @param createPackageDto Parameter input.
+     * @returns Hasil dari operasi create.
+     */
+    @Roles(Role.ADMIN, Role.OPERATOR)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Post()
@@ -37,17 +43,32 @@ export class PackagesController {
     return this.packagesService.create(createPackageDto);
   }
 
-  @Get()
+  /**
+     * Mengambil data melalui operasi findAll.
+     * @returns Hasil dari operasi findAll.
+     */
+    @Get()
   findAll() {
     return this.packagesService.findAll();
   }
 
-  @Get(':id')
+  /**
+     * Mengambil data melalui operasi findOne.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi findOne.
+     */
+    @Get(':id')
   findOne(@Param('id') id: string) {
     return this.packagesService.findOne(+id);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER, Role.OPERATOR)
+  /**
+     * Memperbarui data melalui operasi update.
+     * @param id Parameter input.
+     * @param updatePackageDto Parameter input.
+     * @returns Hasil dari operasi update.
+     */
+    @Roles(Role.ADMIN, Role.TEACHER, Role.OPERATOR)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Patch(':id')
@@ -55,7 +76,12 @@ export class PackagesController {
     return this.packagesService.update(+id, updatePackageDto);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  /**
+     * Memperbarui data melalui operasi toggleTaken.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi toggleTaken.
+     */
+    @Roles(Role.ADMIN, Role.TEACHER)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Patch(':id/toggle-taken')
@@ -63,7 +89,12 @@ export class PackagesController {
     return this.packagesService.toggleTaken(+id);
   }
 
-  @Roles(Role.ADMIN)
+  /**
+     * Menghapus data melalui operasi remove.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi remove.
+     */
+    @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Delete(':id')

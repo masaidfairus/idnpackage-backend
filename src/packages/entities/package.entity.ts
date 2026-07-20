@@ -26,30 +26,37 @@ import { Room } from '../../rooms/entities/room.entity';
 import { Student } from '../../students/entities/student.entity';
 import { PackageLocation } from '../enum/package.enum';
 
+/** Kelas Package adalah entitas database. */
 @Entity()
 export class Package {
-  @PrimaryGeneratedColumn()
+  /** Properti id dengan tipe number. */
+    @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Student, (student) => student.packages)
+  /** Properti studentId dengan tipe import("E:/Main/Code/idnpackage-backend/src/students/entities/student.entity").Student. */
+    @ManyToOne(() => Student, (student) => student.packages)
   @JoinColumn({ name: 'studentId' })
   studentId: Student;
 
-  @ManyToOne(() => Room, (room) => room.packages)
+  /** Properti roomId dengan tipe import("E:/Main/Code/idnpackage-backend/src/rooms/entities/room.entity").Room. */
+    @ManyToOne(() => Room, (room) => room.packages)
   @JoinColumn({ name: 'roomId' })
   roomId: Room;
 
-  @Column({ type: 'date' })
+  /** Properti receivedDate dengan tipe Date. */
+    @Column({ type: 'date' })
   receivedDate: Date;
 
-  @Column({
+  /** Properti location dengan tipe import("E:/Main/Code/idnpackage-backend/src/packages/enum/package.enum").PackageLocation. */
+    @Column({
     type: 'enum',
     enum: PackageLocation,
     default: PackageLocation.SECURITY,
   })
   location: PackageLocation;
 
-  @Column({ type: 'date', nullable: true })
+  /** Properti pickedUpDate dengan tipe Date | null. */
+    @Column({ type: 'date', nullable: true })
   pickedUpDate: Date | null;
 
   /**
@@ -59,20 +66,25 @@ export class Package {
   @Column({ type: 'varchar', nullable: true })
   previousLocation: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  /** Properti notes dengan tipe string | null. */
+    @Column({ type: 'text', nullable: true })
   notes: string | null;
 
-  @Column({ type: 'longtext', nullable: true })
+  /** Properti photoUrl dengan tipe string | null. */
+    @Column({ type: 'longtext', nullable: true })
   photoUrl: string | null;
 
-  @ManyToOne(() => User, (user) => user.packages)
+  /** Properti createdBy dengan tipe import("E:/Main/Code/idnpackage-backend/src/auth/entities/user.entity").User. */
+    @ManyToOne(() => User, (user) => user.packages)
   @JoinColumn({ name: 'createdBy' })
   createdBy: User;
 
-  @CreateDateColumn()
+  /** Properti createdAt dengan tipe Date. */
+    @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  /** Properti updatedAt dengan tipe Date. */
+    @UpdateDateColumn()
   updatedAt: Date;
 
   constructor(studentPackage: Partial<Package>) {

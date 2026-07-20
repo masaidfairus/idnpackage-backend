@@ -24,11 +24,17 @@ import { Role } from '../auth/enum/role.enum';
 import { PassportJwtGuard } from '../auth/guards/passport-jwt.guard';
 import { RolesGuard } from '../auth/guards/roles/roles.guard';
 
+/** Kelas UsersController mengelola request HTTP masuk. */
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Roles(Role.ADMIN)
+  /**
+     * Membuat data baru melalui operasi create.
+     * @param createUserDto Parameter input.
+     * @returns Hasil dari operasi create.
+     */
+    @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Post()
@@ -36,17 +42,32 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Get()
+  /**
+     * Mengambil data melalui operasi findAll.
+     * @returns Hasil dari operasi findAll.
+     */
+    @Get()
   async findAll() {
     return this.usersService.findAll();
   }
 
-  @Get(':id')
+  /**
+     * Mengambil data melalui operasi findOne.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi findOne.
+     */
+    @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
-  @Roles(Role.ADMIN)
+  /**
+     * Memperbarui data melalui operasi update.
+     * @param id Parameter input.
+     * @param updateUserDto Parameter input.
+     * @returns Hasil dari operasi update.
+     */
+    @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Patch(':id')
@@ -54,7 +75,12 @@ export class UsersController {
     return this.usersService.update(+id, updateUserDto);
   }
 
-  @Roles(Role.ADMIN)
+  /**
+     * Menghapus data melalui operasi remove.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi remove.
+     */
+    @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Delete(':id')

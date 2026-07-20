@@ -15,24 +15,31 @@ import {
 import { Package } from '../../packages/entities/package.entity';
 import { Student } from '../../students/entities/student.entity';
 
+/** Kelas Room adalah entitas database. */
 @Entity()
 export class Room {
-  @PrimaryGeneratedColumn()
+  /** Properti id dengan tipe number. */
+    @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  /** Properti name dengan tipe string. */
+    @Column()
   name: string;
 
-  @Column()
+  /** Properti floor dengan tipe number. */
+    @Column()
   floor: number;
 
-  @OneToMany(() => Student, (student) => student.roomId)
+  /** Properti students dengan tipe import("E:/Main/Code/idnpackage-backend/src/students/entities/student.entity").Student[]. */
+    @OneToMany(() => Student, (student) => student.roomId)
   students: Student[];
 
-  @OneToMany(() => Package, (studentPackage) => studentPackage.roomId)
+  /** Properti packages dengan tipe import("E:/Main/Code/idnpackage-backend/src/packages/entities/package.entity").Package[]. */
+    @OneToMany(() => Package, (studentPackage) => studentPackage.roomId)
   packages: Package[];
 
-  @CreateDateColumn()
+  /** Properti createdAt dengan tipe Date. */
+    @CreateDateColumn()
   createdAt: Date;
 
   constructor(room: Partial<Room>) {

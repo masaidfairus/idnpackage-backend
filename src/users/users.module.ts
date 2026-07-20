@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../auth/entities/user.entity';
 import { Room } from '../rooms/entities/room.entity';
 
+/** Kelas UsersModule adalah modul fitur. */
 @Module({
   imports: [TypeOrmModule.forFeature([User, Room])],
   controllers: [UsersController],

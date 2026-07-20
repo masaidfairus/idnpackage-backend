@@ -12,9 +12,16 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 
+/** Kelas HttpExceptionFilter. */
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
+  /**
+     * Mengeksekusi operasi catch.
+     * @param exception Parameter input.
+     * @param host Parameter input.
+     * @returns Hasil dari operasi catch.
+     */
+    catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 

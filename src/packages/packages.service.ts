@@ -19,6 +19,7 @@ import { Student } from '../students/entities/student.entity';
 import { Room } from '../rooms/entities/room.entity';
 import { User } from '../auth/entities/user.entity';
 
+/** Kelas PackagesService menangani logika bisnis. */
 @Injectable()
 export class PackagesService {
   constructor(
@@ -36,7 +37,12 @@ export class PackagesService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async create(createPackageDto: CreatePackageDto) {
+  /**
+     * Mengeksekusi operasi create.
+     * @param createPackageDto Parameter input.
+     * @returns Hasil dari operasi create.
+     */
+    async create(createPackageDto: CreatePackageDto) {
     const { studentId, roomId, createdBy, ...packageData } = createPackageDto;
     const student = await this.studentRepository.findOne({
       where: { id: studentId },
@@ -66,7 +72,11 @@ export class PackagesService {
     return newPackage;
   }
 
-  async findAll() {
+  /**
+     * Mengeksekusi operasi findAll.
+     * @returns Hasil dari operasi findAll.
+     */
+    async findAll() {
     return this.packageRepository.find({
       relations: {
         studentId: true,
@@ -76,7 +86,12 @@ export class PackagesService {
     });
   }
 
-  async findOne(id: number) {
+  /**
+     * Mengeksekusi operasi findOne.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi findOne.
+     */
+    async findOne(id: number) {
     return this.packageRepository.findOne({
       where: { id },
       relations: {
@@ -87,7 +102,13 @@ export class PackagesService {
     });
   }
 
-  async update(id: number, updatePackageDto: UpdatePackageDto) {
+  /**
+     * Mengeksekusi operasi update.
+     * @param id Parameter input.
+     * @param updatePackageDto Parameter input.
+     * @returns Hasil dari operasi update.
+     */
+    async update(id: number, updatePackageDto: UpdatePackageDto) {
     const studentPackage = await this.packageRepository.findOne({
       where: { id },
       relations: { studentId: true, roomId: true, createdBy: true },
@@ -166,7 +187,12 @@ export class PackagesService {
     return this.entityManager.save(studentPackage);
   }
 
-  async remove(id: number) {
+  /**
+     * Mengeksekusi operasi remove.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi remove.
+     */
+    async remove(id: number) {
     return this.packageRepository.delete(id);
   }
 }

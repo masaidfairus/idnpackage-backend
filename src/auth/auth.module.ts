@@ -18,6 +18,7 @@ import { PassportAuthController } from './passport-auth.controller';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
+/** Kelas AuthModule adalah modul fitur. */
 @Module({
   providers: [AuthService, LocalStrategy, JwtStrategy],
   controllers: [AuthController, PassportAuthController],

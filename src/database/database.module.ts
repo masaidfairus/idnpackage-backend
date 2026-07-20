@@ -8,6 +8,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+/** Kelas DatabaseModule adalah modul fitur. */
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({

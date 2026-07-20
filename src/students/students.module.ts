@@ -6,6 +6,7 @@ import { Student } from './entities/student.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Room } from '../rooms/entities/room.entity';
 
+/** Kelas StudentsModule adalah modul fitur. */
 @Module({
   imports: [TypeOrmModule.forFeature([Student, Room])],
   controllers: [StudentsController],

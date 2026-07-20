@@ -20,23 +20,39 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from './guards/auth.guard';
 import type { AuthInput } from './enum/auth.enum';
 
+/** Kelas AuthController mengelola request HTTP masuk. */
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @HttpCode(HttpStatus.OK)
+  /**
+     * Membuat data baru melalui operasi login.
+     * @param input Parameter input.
+     * @returns Hasil dari operasi login.
+     */
+    @HttpCode(HttpStatus.OK)
   @Post('login')
   login(@Body() input: AuthInput) {
     return this.authService.authenticate(input);
   }
 
-  @Get('me')
+  /**
+     * Mengambil data melalui operasi getUserInfo.
+     * @param request Parameter input.
+     * @returns Hasil dari operasi getUserInfo.
+     */
+    @Get('me')
   @UseGuards(AuthGuard)
   getUserInfo(@Request() request) {
     return request.user;
   }
 
-  @Post('logout')
+  /**
+     * Membuat data baru melalui operasi logout.
+     * @param request Parameter input.
+     * @returns Hasil dari operasi logout.
+     */
+    @Post('logout')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   logout(@Request() request) {

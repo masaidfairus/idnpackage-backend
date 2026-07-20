@@ -16,6 +16,7 @@ import { Student } from './entities/student.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { Room } from '../rooms/entities/room.entity';
 
+/** Kelas StudentsService menangani logika bisnis. */
 @Injectable()
 export class StudentsService {
   constructor(
@@ -27,7 +28,12 @@ export class StudentsService {
     private readonly roomRepository: Repository<Room>,
   ) {}
 
-  async create(createStudentDto: CreateStudentDto) {
+  /**
+     * Mengeksekusi operasi create.
+     * @param createStudentDto Parameter input.
+     * @returns Hasil dari operasi create.
+     */
+    async create(createStudentDto: CreateStudentDto) {
     const { roomId, ...studentData } = createStudentDto;
     const room = await this.roomRepository.findOne({
       where: { id: roomId },
@@ -148,25 +154,44 @@ export class StudentsService {
     return { deleted: result?.affectedRows ?? 'all' };
   }
 
-  async findAll() {
+  /**
+     * Mengeksekusi operasi findAll.
+     * @returns Hasil dari operasi findAll.
+     */
+    async findAll() {
     return this.studentRepository.find({
       where: { isActive: true },
       relations: { roomId: true },
     });
   }
 
-  async findAllArchived() {
+  /**
+     * Mengeksekusi operasi findAllArchived.
+     * @returns Hasil dari operasi findAllArchived.
+     */
+    async findAllArchived() {
     return this.studentRepository.find({
       where: { isActive: false },
       relations: { roomId: true },
     });
   }
 
-  async findOne(id: number) {
+  /**
+     * Mengeksekusi operasi findOne.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi findOne.
+     */
+    async findOne(id: number) {
     return this.studentRepository.findOneBy({ id });
   }
 
-  async update(id: number, updateStudentDto: UpdateStudentDto) {
+  /**
+     * Mengeksekusi operasi update.
+     * @param id Parameter input.
+     * @param updateStudentDto Parameter input.
+     * @returns Hasil dari operasi update.
+     */
+    async update(id: number, updateStudentDto: UpdateStudentDto) {
     const student = await this.studentRepository.findOneBy({ id });
 
     if (!student) {
@@ -188,7 +213,12 @@ export class StudentsService {
     return this.entityManager.save(student);
   }
 
-  async remove(id: number) {
+  /**
+     * Mengeksekusi operasi remove.
+     * @param id Parameter input.
+     * @returns Hasil dari operasi remove.
+     */
+    async remove(id: number) {
     return this.studentRepository.delete(id);
   }
 }

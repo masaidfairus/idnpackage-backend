@@ -20,28 +20,36 @@ import {
 import { Room } from '../../rooms/entities/room.entity';
 import { Package } from '../../packages/entities/package.entity';
 
+/** Kelas Student adalah entitas database. */
 @Entity()
 export class Student {
-  @PrimaryGeneratedColumn()
+  /** Properti id dengan tipe number. */
+    @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  /** Properti name dengan tipe string. */
+    @Column()
   name: string;
 
-  @Column({ nullable: true })
+  /** Properti nis dengan tipe string. */
+    @Column({ nullable: true })
   nis: string;
 
-  @Column({ default: true })
+  /** Properti isActive dengan tipe boolean. */
+    @Column({ default: true })
   isActive: boolean;
 
-  @ManyToOne(() => Room, (room) => room.students)
+  /** Properti roomId dengan tipe import("E:/Main/Code/idnpackage-backend/src/rooms/entities/room.entity").Room. */
+    @ManyToOne(() => Room, (room) => room.students)
   @JoinColumn({ name: 'roomId' })
   roomId: Room;
 
-  @OneToMany(() => Package, (studentPackage) => studentPackage.studentId)
+  /** Properti packages dengan tipe import("E:/Main/Code/idnpackage-backend/src/packages/entities/package.entity").Package[]. */
+    @OneToMany(() => Package, (studentPackage) => studentPackage.studentId)
   packages: Package[];
 
-  @CreateDateColumn()
+  /** Properti createdAt dengan tipe Date. */
+    @CreateDateColumn()
   createdAt: Date;
 
   constructor(student: Partial<Student>) {
