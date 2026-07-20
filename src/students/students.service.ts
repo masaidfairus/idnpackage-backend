@@ -1,11 +1,13 @@
 /**
  * Service CRUD untuk Student.
  *
- * Catatan:
+ * Fitur:
  * - create() dan update() me-resolve roomId (number) ke entity Room.
- * - update() hanya me-resolve roomId jika field tersebut dikirim.
+ * - bulkSync(): upsert by NIS, fallback dedup by nama+kamar jika NIS kosong.
+ * - archiveStudent(): soft-delete (isActive=false) untuk santri yang lulus.
+ * - resetAll(): hapus semua santri aktif untuk hard reset tahun ajaran baru.
  */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { CreateBulkStudentDto } from './dto/create-bulk-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
@@ -35,16 +37,24 @@ export class StudentsService {
       throw new NotFoundException(`Room with ID ${roomId} does not exist.`);
     }
 
-    const newStudent = new Student({ ...studentData, roomId: room });
+    const newStudent = new Student({ ...studentData, roomId: room, isActive: true });
     await this.entityManager.save(newStudent);
     return newStudent;
   }
 
-  async bulkCreate(createBulkDto: CreateBulkStudentDto) {
-    const results: Student[] = [];
+  /**
+   * Bulk Sync (Mixed Strategy):
+   * 1. Jika NIS ada & valid → Upsert by NIS (update nama & kamar jika sudah ada).
+   * 2. Jika NIS kosong/N/A → Fallback: dedup by nama+kamar.
+   * 3. Santri yang diarsipkan dengan NIS yang sama → Re-aktifkan otomatis.
+   */
+  async bulkSync(createBulkDto: CreateBulkStudentDto) {
+    const added: Student[] = [];
+    const updated: string[] = [];
+    const skipped: string[] = [];
     const roomCache: Record<string, Room> = {};
 
-    // Retrieve existing rooms to seed cache
+    // Seed room cache
     const existingRooms = await this.roomRepository.find();
     existingRooms.forEach(room => {
       roomCache[room.name.toLowerCase()] = room;
@@ -52,29 +62,104 @@ export class StudentsService {
 
     for (const studentData of createBulkDto.students) {
       const roomKey = studentData.roomName.toLowerCase();
-      let room = roomCache[roomKey];
+      const room = roomCache[roomKey];
 
       if (!room) {
-        room = new Room({ name: studentData.roomName });
-        await this.entityManager.save(room);
-        roomCache[roomKey] = room; // Add to cache for subsequent students
+        throw new BadRequestException(
+          "Kamar \"" + studentData.roomName + "\" tidak ditemukan di database. Pastikan Anda menggunakan nama kamar yang sudah ada."
+        );
       }
 
-      const newStudent = new Student({
-        name: studentData.name,
-        nis: studentData.nis || 'N/A',
-        roomId: room,
-      });
+      const hasValidNis = studentData.nis && studentData.nis.trim() !== '' && studentData.nis.trim() !== 'N/A';
 
-      await this.entityManager.save(newStudent);
-      results.push(newStudent);
+      if (hasValidNis) {
+        // === STRATEGY 1: Upsert by NIS ===
+        const existing = await this.studentRepository.findOne({
+          where: { nis: studentData.nis },
+          relations: { roomId: true },
+        });
+
+        if (existing) {
+          // Update nama, kamar, dan re-aktifkan jika sempat diarsipkan
+          existing.name = studentData.name;
+          existing.roomId = room;
+          existing.isActive = true;
+          await this.entityManager.save(existing);
+          updated.push(studentData.name);
+        } else {
+          const newStudent = new Student({
+            name: studentData.name,
+            nis: studentData.nis,
+            roomId: room,
+            isActive: true,
+          });
+          await this.entityManager.save(newStudent);
+          added.push(newStudent);
+        }
+      } else {
+        // === STRATEGY 2: Fallback dedup by nama+kamar ===
+        const existing = await this.studentRepository.findOne({
+          where: {
+            name: studentData.name,
+            roomId: { id: room.id },
+          },
+          relations: { roomId: true },
+        });
+
+        if (existing) {
+          skipped.push(studentData.name);
+        } else {
+          const newStudent = new Student({
+            name: studentData.name,
+            nis: studentData.nis || undefined,
+            roomId: room,
+            isActive: true,
+          });
+          await this.entityManager.save(newStudent);
+          added.push(newStudent);
+        }
+      }
     }
 
-    return results;
+    return {
+      added: added.length,
+      updated: updated.length,
+      skipped: skipped.length,
+      details: { added: added.map(s => s.name), updated, skipped },
+    };
+  }
+
+  /** Arsipkan santri yang lulus (soft delete) */
+  async archiveStudent(id: number) {
+    const student = await this.studentRepository.findOneBy({ id });
+    if (!student) throw new NotFoundException(`Student with ID ${id} not found`);
+    student.isActive = false;
+    return this.entityManager.save(student);
+  }
+
+  /** Hard reset: Hapus bersih semua paket dan semua santri (untuk awal tahun ajaran baru) */
+  async resetAllActive() {
+    // Hapus semua data paket agar foreign key tidak error
+    await this.entityManager.query('DELETE FROM package');
+    
+    // Hapus bersih semua santri dengan raw query untuk menghindari TypeORM "empty criteria" error
+    const result = await this.entityManager.query('DELETE FROM student');
+    // result dari DELETE query di mysql driver array berisi info affectedRows
+    return { deleted: result?.affectedRows ?? 'all' };
   }
 
   async findAll() {
-    return this.studentRepository.find({ relations: { roomId: true } });
+    return this.studentRepository.find({
+      where: { isActive: true },
+      relations: { roomId: true },
+    });
+  }
+
+  async findAllArchived() {
+    return this.studentRepository.find({
+      where: { isActive: false },
+      relations: { roomId: true },
+    });
   }
 
   async findOne(id: number) {

@@ -6,7 +6,6 @@
  * - GET: Publik
  *
  * Setiap student terhubung ke satu Room.
- * NIS bersifat unique.
  */
 import {
   Controller,
@@ -39,17 +38,32 @@ export class StudentsController {
     return this.studentsService.create(createStudentDto);
   }
 
+  /** Bulk sync: upsert by NIS, fallback dedup by nama+kamar */
   @Roles(Role.ADMIN, Role.TEACHER)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Post('bulk')
-  async bulkCreate(@Body() createBulkDto: CreateBulkStudentDto) {
-    return this.studentsService.bulkCreate(createBulkDto);
+  async bulkSync(@Body() createBulkDto: CreateBulkStudentDto) {
+    return this.studentsService.bulkSync(createBulkDto);
+  }
+
+  /** Hard reset: hapus semua santri aktif (tahun ajaran baru) */
+  @Roles(Role.ADMIN)
+  @UseGuards(RolesGuard)
+  @UseGuards(PassportJwtGuard)
+  @Delete('reset-all')
+  async resetAll() {
+    return this.studentsService.resetAllActive();
   }
 
   @Get()
   async findAll() {
     return this.studentsService.findAll();
+  }
+
+  @Get('archived')
+  async findArchived() {
+    return this.studentsService.findAllArchived();
   }
 
   @Get(':id')
@@ -66,6 +80,15 @@ export class StudentsController {
     @Body() updateStudentDto: UpdateStudentDto,
   ) {
     return this.studentsService.update(+id, updateStudentDto);
+  }
+
+  /** Arsipkan santri yang lulus (soft delete) */
+  @Roles(Role.ADMIN)
+  @UseGuards(RolesGuard)
+  @UseGuards(PassportJwtGuard)
+  @Patch(':id/archive')
+  async archive(@Param('id') id: string) {
+    return this.studentsService.archiveStudent(+id);
   }
 
   @Roles(Role.ADMIN, Role.TEACHER)

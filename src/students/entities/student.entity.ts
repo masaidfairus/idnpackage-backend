@@ -5,7 +5,8 @@
  * - roomId -> Room (kamar siswa)
  * - packages: satu siswa bisa punya banyak paket
  *
- * NIS bersifat unique.
+ * NIS bersifat unique (jika bukan 'N/A').
+ * isActive: false = santri sudah lulus/diarsipkan (soft delete).
  */
 import {
   Column,
@@ -15,7 +16,6 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  Unique,
 } from 'typeorm';
 import { Room } from '../../rooms/entities/room.entity';
 import { Package } from '../../packages/entities/package.entity';
@@ -28,8 +28,11 @@ export class Student {
   @Column()
   name: string;
 
-  @Column({ unique: true })
+  @Column({ nullable: true })
   nis: string;
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @ManyToOne(() => Room, (room) => room.students)
   @JoinColumn({ name: 'roomId' })
