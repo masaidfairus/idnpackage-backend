@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString, IsOptional } from 'class-validator';
 import { PackageLocation } from '../enum/package.enum';
 
 export class CreatePackageDto {
@@ -14,9 +14,11 @@ export class CreatePackageDto {
   @IsNotEmpty()
   location!: PackageLocation;
 
+  @IsOptional()
   @IsString()
   notes?: string | null;
 
+  @IsOptional()
   @IsString()
   photoUrl?: string | null;
 
