@@ -47,7 +47,7 @@ export class PackagesController {
     return this.packagesService.findOne(+id);
   }
 
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN, Role.TEACHER, Role.OPERATOR)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Patch(':id')
