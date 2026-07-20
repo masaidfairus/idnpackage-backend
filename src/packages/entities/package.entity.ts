@@ -52,10 +52,17 @@ export class Package {
   @Column({ type: 'date', nullable: true })
   pickedUpDate: Date | null;
 
+  /**
+   * Menyimpan lokasi sebelum santri mengambil paket (dijadikan 'taken').
+   * Digunakan untuk fitur "Batalkan Diterima" agar paket kembali ke lokasi semula.
+   */
+  @Column({ type: 'varchar', nullable: true })
+  previousLocation: string | null;
+
   @Column({ type: 'text', nullable: true })
   notes: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'longtext', nullable: true })
   photoUrl: string | null;
 
   @ManyToOne(() => User, (user) => user.packages)

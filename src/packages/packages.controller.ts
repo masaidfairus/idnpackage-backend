@@ -55,6 +55,14 @@ export class PackagesController {
     return this.packagesService.update(+id, updatePackageDto);
   }
 
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @UseGuards(RolesGuard)
+  @UseGuards(PassportJwtGuard)
+  @Patch(':id/toggle-taken')
+  toggleTaken(@Param('id') id: string) {
+    return this.packagesService.toggleTaken(+id);
+  }
+
   @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)

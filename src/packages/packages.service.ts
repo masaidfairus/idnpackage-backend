@@ -9,6 +9,7 @@
  * - receivedDate auto-set ke tanggal saat create.
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { PackageLocation } from './enum/package.enum';
 import { CreatePackageDto } from './dto/create-package.dto';
 import { UpdatePackageDto } from './dto/update-package.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -130,6 +131,36 @@ export class PackagesService {
         );
       }
       studentPackage.createdBy = operator;
+    }
+
+    return this.entityManager.save(studentPackage);
+  }
+
+  /**
+   * Toggle status paket antara 'taken' dan lokasi sebelumnya.
+   * Digunakan oleh Teacher: ketika santri mengambil paket bersama teacher,
+   * teacher bisa menandai sebagai diterima, atau membatalkannya.
+   */
+  async toggleTaken(id: number) {
+    const studentPackage = await this.packageRepository.findOne({
+      where: { id },
+      relations: { studentId: true, roomId: true, createdBy: true },
+    });
+
+    if (!studentPackage) {
+      throw new NotFoundException(`Package with ID ${id} not found`);
+    }
+
+    if (studentPackage.location === 'taken') {
+      // Batalkan: kembalikan ke lokasi sebelumnya (atau security_post jika tidak ada)
+      studentPackage.location = (studentPackage.previousLocation as PackageLocation) || PackageLocation.SECURITY;
+      studentPackage.previousLocation = null;
+      studentPackage.pickedUpDate = null;
+    } else {
+      // Tandai sebagai diterima: simpan lokasi saat ini dulu
+      studentPackage.previousLocation = studentPackage.location;
+      studentPackage.location = PackageLocation.TAKEN;
+      studentPackage.pickedUpDate = new Date() as any;
     }
 
     return this.entityManager.save(studentPackage);
