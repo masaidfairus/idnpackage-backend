@@ -15,8 +15,11 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Package } from '../../packages/entities/package.entity';
+import { Room } from '../../rooms/entities/room.entity';
 import { Role } from '../../auth/enum/role.enum';
 
 @Entity()
@@ -45,6 +48,13 @@ export class User {
 
   @OneToMany(() => Package, (studentPackage) => studentPackage.createdBy)
   packages: Package[];
+
+  @ManyToOne(() => Room, { nullable: true })
+  @JoinColumn({ name: 'roomId' })
+  room: Room | null;
+
+  @Column({ nullable: true })
+  roomId: number | null;
 
   @CreateDateColumn()
   createdAt: Date;

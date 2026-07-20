@@ -13,18 +13,22 @@ import { EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../auth/entities/user.entity';
+import { Room } from '../rooms/entities/room.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Room)
+    private readonly roomRepository: Repository<Room>,
     private readonly entityManager: EntityManager,
   ) {}
 
   async findUserByEmail(email: string) {
     return this.usersRepository.findOne({
       where: { email },
+      relations: { room: true },
     });
   }
 
@@ -35,18 +39,28 @@ export class UsersService {
       saltOrRounds,
     );
 
-    createUserDto.password = hashedPassword;
-    const user = new User(createUserDto);
+    const { roomId, ...rest } = createUserDto;
+    rest.password = hashedPassword;
+    
+    const user = new User(rest);
+    if (roomId) {
+      const room = await this.roomRepository.findOneBy({ id: roomId });
+      if (room) user.room = room;
+    }
+
     await this.entityManager.save(user);
     return user;
   }
 
   async findAll() {
-    return this.usersRepository.find();
+    return this.usersRepository.find({ relations: { room: true } });
   }
 
   async findOne(id: number) {
-    return this.usersRepository.findOneBy({ id });
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: { room: true },
+    });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -56,16 +70,28 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    if (updateUserDto.password) {
+    const { roomId, ...rest } = updateUserDto;
+
+    if (rest.password) {
       const saltOrRounds = 10;
       const hashedPassword = await bcrypt.hash(
-        updateUserDto.password,
+        rest.password,
         saltOrRounds,
       );
-      updateUserDto.password = hashedPassword;
+      rest.password = hashedPassword;
     }
 
-    Object.assign(user, updateUserDto);
+    Object.assign(user, rest);
+    
+    if (roomId !== undefined) {
+      if (roomId === null) {
+        user.room = null;
+      } else {
+        const room = await this.roomRepository.findOneBy({ id: roomId });
+        if (room) user.room = room;
+      }
+    }
+
     return this.entityManager.save(user);
   }
 

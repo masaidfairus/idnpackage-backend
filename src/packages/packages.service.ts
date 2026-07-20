@@ -50,7 +50,7 @@ export class PackagesService {
     });
 
     if (!student || !room || !operator) {
-      throw new NotFoundException(`Student, Room, Operator ID does not exist.`);
+      throw new NotFoundException(`Student, Room, or Operator ID does not exist.`);
     }
 
     const newPackage = new Package({

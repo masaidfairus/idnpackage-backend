@@ -37,7 +37,6 @@ export class AuthService {
 
     if (user) {
       const isMatch = await bcrypt.compare(input.password, user.password);
-
       if (!isMatch) {
         throw new UnauthorizedException();
       }
@@ -46,6 +45,8 @@ export class AuthService {
         userId: user.id,
         name: user.name,
         role: user.role,
+        roomId: user.room?.id ?? null,
+        roomName: user.room?.name ?? null,
         tokenVersion: user.tokenVersion,
       };
     }
@@ -58,6 +59,8 @@ export class AuthService {
       sub: user.userId,
       name: user.name,
       role: user.role,
+      roomId: user.roomId,
+      roomName: user.roomName,
       tokenVersion: user.tokenVersion,
     };
 
@@ -68,6 +71,8 @@ export class AuthService {
       userId: user.userId,
       name: user.name,
       role: user.role,
+      roomId: user.roomId,
+      roomName: user.roomName,
       tokenVersion: user.tokenVersion,
     };
   }

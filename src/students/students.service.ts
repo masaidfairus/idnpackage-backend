@@ -41,7 +41,7 @@ export class StudentsService {
   }
 
   async bulkCreate(createBulkDto: CreateBulkStudentDto) {
-    const results = [];
+    const results: Student[] = [];
     const roomCache: Record<string, Room> = {};
 
     // Retrieve existing rooms to seed cache

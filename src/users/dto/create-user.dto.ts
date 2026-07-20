@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsNumber,
 } from 'class-validator';
 import { Role } from '../../auth/enum/role.enum';
 
@@ -20,7 +21,10 @@ export class CreateUserDto {
   @IsNotEmpty()
   password!: string;
 
-  @IsOptional()
   @IsEnum(Role)
   role?: Role;
+
+  @IsOptional()
+  @IsNumber()
+  roomId?: number | null;
 }

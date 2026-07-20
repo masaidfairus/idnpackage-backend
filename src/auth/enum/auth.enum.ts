@@ -6,6 +6,8 @@ export type SignInData = {
   userId: number;
   name: string;
   role: string;
+  roomId: number | null;
+  roomName: string | null;
   tokenVersion: number;
 };
 
