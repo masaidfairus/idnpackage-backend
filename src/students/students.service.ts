@@ -7,7 +7,11 @@
  * - archiveStudent(): soft-delete (isActive=false) untuk santri yang lulus.
  * - resetAll(): hapus semua santri aktif untuk hard reset tahun ajaran baru.
  */
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { CreateBulkStudentDto } from './dto/create-bulk-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
@@ -29,11 +33,11 @@ export class StudentsService {
   ) {}
 
   /**
-     * Mengeksekusi operasi create.
-     * @param createStudentDto Parameter input.
-     * @returns Hasil dari operasi create.
-     */
-    async create(createStudentDto: CreateStudentDto) {
+   * Mengeksekusi operasi create.
+   * @param createStudentDto Parameter input.
+   * @returns Hasil dari operasi create.
+   */
+  async create(createStudentDto: CreateStudentDto) {
     const { roomId, ...studentData } = createStudentDto;
     const room = await this.roomRepository.findOne({
       where: { id: roomId },
@@ -43,7 +47,11 @@ export class StudentsService {
       throw new NotFoundException(`Room with ID ${roomId} does not exist.`);
     }
 
-    const newStudent = new Student({ ...studentData, roomId: room, isActive: true });
+    const newStudent = new Student({
+      ...studentData,
+      roomId: room,
+      isActive: true,
+    });
     await this.entityManager.save(newStudent);
     return newStudent;
   }
@@ -62,7 +70,7 @@ export class StudentsService {
 
     // Seed room cache
     const existingRooms = await this.roomRepository.find();
-    existingRooms.forEach(room => {
+    existingRooms.forEach((room) => {
       roomCache[room.name.toLowerCase()] = room;
     });
 
@@ -72,11 +80,16 @@ export class StudentsService {
 
       if (!room) {
         throw new BadRequestException(
-          "Kamar \"" + studentData.roomName + "\" tidak ditemukan di database. Pastikan Anda menggunakan nama kamar yang sudah ada."
+          'Kamar "' +
+            studentData.roomName +
+            '" tidak ditemukan di database. Pastikan Anda menggunakan nama kamar yang sudah ada.',
         );
       }
 
-      const hasValidNis = studentData.nis && studentData.nis.trim() !== '' && studentData.nis.trim() !== 'N/A';
+      const hasValidNis =
+        studentData.nis &&
+        studentData.nis.trim() !== '' &&
+        studentData.nis.trim() !== 'N/A';
 
       if (hasValidNis) {
         // === STRATEGY 1: Upsert by NIS ===
@@ -131,14 +144,15 @@ export class StudentsService {
       added: added.length,
       updated: updated.length,
       skipped: skipped.length,
-      details: { added: added.map(s => s.name), updated, skipped },
+      details: { added: added.map((s) => s.name), updated, skipped },
     };
   }
 
   /** Arsipkan santri yang lulus (soft delete) */
   async archiveStudent(id: number) {
     const student = await this.studentRepository.findOneBy({ id });
-    if (!student) throw new NotFoundException(`Student with ID ${id} not found`);
+    if (!student)
+      throw new NotFoundException(`Student with ID ${id} not found`);
     student.isActive = false;
     return this.entityManager.save(student);
   }
@@ -147,7 +161,7 @@ export class StudentsService {
   async resetAllActive() {
     // Hapus semua data paket agar foreign key tidak error
     await this.entityManager.query('DELETE FROM package');
-    
+
     // Hapus bersih semua santri dengan raw query untuk menghindari TypeORM "empty criteria" error
     const result = await this.entityManager.query('DELETE FROM student');
     // result dari DELETE query di mysql driver array berisi info affectedRows
@@ -155,10 +169,10 @@ export class StudentsService {
   }
 
   /**
-     * Mengeksekusi operasi findAll.
-     * @returns Hasil dari operasi findAll.
-     */
-    async findAll() {
+   * Mengeksekusi operasi findAll.
+   * @returns Hasil dari operasi findAll.
+   */
+  async findAll() {
     return this.studentRepository.find({
       where: { isActive: true },
       relations: { roomId: true },
@@ -166,10 +180,10 @@ export class StudentsService {
   }
 
   /**
-     * Mengeksekusi operasi findAllArchived.
-     * @returns Hasil dari operasi findAllArchived.
-     */
-    async findAllArchived() {
+   * Mengeksekusi operasi findAllArchived.
+   * @returns Hasil dari operasi findAllArchived.
+   */
+  async findAllArchived() {
     return this.studentRepository.find({
       where: { isActive: false },
       relations: { roomId: true },
@@ -177,21 +191,21 @@ export class StudentsService {
   }
 
   /**
-     * Mengeksekusi operasi findOne.
-     * @param id Parameter input.
-     * @returns Hasil dari operasi findOne.
-     */
-    async findOne(id: number) {
+   * Mengeksekusi operasi findOne.
+   * @param id Parameter input.
+   * @returns Hasil dari operasi findOne.
+   */
+  async findOne(id: number) {
     return this.studentRepository.findOneBy({ id });
   }
 
   /**
-     * Mengeksekusi operasi update.
-     * @param id Parameter input.
-     * @param updateStudentDto Parameter input.
-     * @returns Hasil dari operasi update.
-     */
-    async update(id: number, updateStudentDto: UpdateStudentDto) {
+   * Mengeksekusi operasi update.
+   * @param id Parameter input.
+   * @param updateStudentDto Parameter input.
+   * @returns Hasil dari operasi update.
+   */
+  async update(id: number, updateStudentDto: UpdateStudentDto) {
     const student = await this.studentRepository.findOneBy({ id });
 
     if (!student) {
@@ -214,11 +228,11 @@ export class StudentsService {
   }
 
   /**
-     * Mengeksekusi operasi remove.
-     * @param id Parameter input.
-     * @returns Hasil dari operasi remove.
-     */
-    async remove(id: number) {
+   * Mengeksekusi operasi remove.
+   * @param id Parameter input.
+   * @returns Hasil dari operasi remove.
+   */
+  async remove(id: number) {
     return this.studentRepository.delete(id);
   }
 }

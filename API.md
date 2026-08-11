@@ -374,20 +374,84 @@ Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
   "id": 1,
   "name": "Budi Santoso",
   "nis": "1234567890",
+  "isActive": true,
   "roomId": { ... },
   "createdAt": "2026-06-14T15:30:00.000Z"
 }
 ```
 
 > `roomId` is returned as a full nested Room object.
+>
+> `isActive` indicates whether the student is current (`true`) or archived (`false`).
 
 ---
 
-### GET `/students`
+### POST `/students/bulk` — Bulk sync students
+
+Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
+
+Bulk-create/update students from an imported list (e.g. CSV). Matching strategy:
+
+1. **Upsert by NIS** when a valid NIS is provided (updates existing student & re-activates archived ones).
+2. **Dedupe by name + room** when NIS is empty/`N/A` (skips if a match already exists).
+
+Room is resolved by `roomName` — case-insensitive. Any non-existent room name aborts with a 400 error.
+
+**Request body:**
+
+```json
+{
+  "students": [
+    {
+      "name": "Budi Santoso",
+      "nis": "1234567890",
+      "roomName": "Kamar 2.4"
+    },
+    {
+      "name": "Siti Aminah",
+      "roomName": "Kamar 2.4"
+    }
+  ]
+}
+```
+
+| Field          | Type     | Required | Description                       |
+| -------------- | -------- | -------- | --------------------------------- |
+| `students`     | array    | yes      | List of student entries           |
+| `students[].name`     | string | yes      | Student's full name               |
+| `students[].nis`      | string | no       | Student NIS; skip/blank/`N/A` uses name+room dedupe |
+| `students[].roomName` | string | yes      | Existing room name (case-insensitive) |
+
+**Response `data`:**
+
+```json
+{
+  "added": 1,
+  "updated": 0,
+  "skipped": 1,
+  "details": {
+    "added": ["Budi Santoso"],
+    "updated": [],
+    "skipped": ["Siti Aminah"]
+  }
+}
+```
+
+---
+
+### GET `/students` — List active students
 
 Public.
 
-**Response `data`:** Array of student objects.
+**Response `data`:** Array of active (`isActive: true`) student objects.
+
+---
+
+### GET `/students/archived` — List archived students
+
+Public.
+
+**Response `data`:** Array of archived (`isActive: false`) student objects.
 
 ---
 
@@ -419,6 +483,16 @@ All fields optional. Only provided fields are updated.
 
 ---
 
+### PATCH `/students/:id/archive` — Archive a student
+
+Requires `Authorization: Bearer <token>` header and role `admin`.
+
+Soft-deletes the student by setting `isActive` to `false` (e.g. graduate). The student no longer appears in `GET /students` but is kept in `GET /students/archived`.
+
+**Response `data`:** The updated student object with `isActive: false`.
+
+---
+
 ### DELETE `/students/:id`
 
 Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
@@ -427,7 +501,106 @@ Requires `Authorization: Bearer <token>` header and role `admin` or `teacher`.
 
 ---
 
-## 7. Packages
+### DELETE `/students/reset-all` — Reset all students
+
+Requires `Authorization: Bearer <token>` header and role `admin`.
+
+Hard-reset for a new academic year. Deletes **all** packages first (to avoid foreign-key errors), then removes **all** students from the database (active and archived).
+
+**Response `data`:**
+
+```json
+{
+  "deleted": "all"
+}
+```
+
+> ⚠️ **Destructive.** This permanently removes every package and student record.
+
+---
+
+## 7. Employees
+
+---
+
+### POST `/employees` — Create an employee
+
+Requires `Authorization: Bearer <token>` header and role `admin`.
+
+**Request body:**
+
+```json
+{
+  "name": "Budi Santoso",
+  "division": "Keamanan",
+  "position": "Satpam"
+}
+```
+
+| Field      | Type   | Required | Description        |
+| ---------- | ------ | -------- | ------------------ |
+| `name`     | string | yes      | Employee full name |
+| `division` | string | yes      | Employee division  |
+| `position` | string | yes      | Job position       |
+
+**Response `data`:** The created employee object:
+
+```json
+{
+  "id": 1,
+  "name": "Budi Santoso",
+  "division": "Keamanan",
+  "position": "Satpam"
+}
+```
+
+---
+
+### GET `/employees` — List all employees
+
+Public.
+
+**Response `data`:** Array of employee objects.
+
+---
+
+### GET `/employees/:id` — Get an employee by ID
+
+Public.
+
+**Response `data`:** Single employee object or `null`.
+
+---
+
+### PATCH `/employees/:id` — Update an employee
+
+Requires `Authorization: Bearer <token>` header and role `admin`.
+
+All fields optional. Only provided fields are updated.
+
+**Request body:** (any subset)
+
+```json
+{
+  "name": "Updated Name",
+  "division": "Kebersihan",
+  "position": "Petugas Kebersihan"
+}
+```
+
+**Response `data`:** The updated employee object.
+
+---
+
+### DELETE `/employees/:id` — Delete an employee
+
+Requires `Authorization: Bearer <token>` header and role `admin`.
+
+**Response `data`:** The delete result object.
+
+---
+
+## 8. Packages
 
 ---
 
@@ -537,7 +710,7 @@ Requires `Authorization: Bearer <token>` header and role `admin`.
 
 ---
 
-## 8. Error Scenarios
+## 9. Error Scenarios
 
 | Scenario             | Status | Example `message`                                        |
 | -------------------- | ------ | -------------------------------------------------------- |
@@ -549,7 +722,7 @@ Requires `Authorization: Bearer <token>` header and role `admin`.
 
 ---
 
-## 9. JWT Token Info
+## 10. JWT Token Info
 
 - **Algorithm:** HS256
 - **Expires:** 1 day
@@ -568,7 +741,7 @@ Requires `Authorization: Bearer <token>` header and role `admin`.
 
 ---
 
-## 10. Enums
+## 11. Enums
 
 | Enum              | Values                                       |
 | ----------------- | -------------------------------------------- |
@@ -577,7 +750,7 @@ Requires `Authorization: Bearer <token>` header and role `admin`.
 
 ---
 
-## 11. Quick Reference Table
+## 12. Quick Reference Table
 
 | Method | Path              | Auth                    | Body                                    |
 | ------ | ----------------- | ----------------------- | --------------------------------------- |
@@ -598,10 +771,19 @@ Requires `Authorization: Bearer <token>` header and role `admin`.
 | PATCH  | `/rooms/:id`      | Bearer + Admin/Teacher  | `{ name?, floor? }`                     |
 | DELETE | `/rooms/:id`      | Bearer + Admin/Teacher  | —                                       |
 | POST   | `/students`       | Bearer + Admin/Teacher  | `{ name, nis, roomId }`                 |
+| POST   | `/students/bulk`  | Bearer + Admin/Teacher  | `{ students: [{ name, nis?, roomName }] }` |
 | GET    | `/students`       | —                       | —                                       |
+| GET    | `/students/archived` | —                    | —                                       |
 | GET    | `/students/:id`   | —                       | —                                       |
 | PATCH  | `/students/:id`   | Bearer + Admin/Teacher  | `{ name?, nis?, roomId? }`              |
+| PATCH  | `/students/:id/archive` | Bearer + Admin      | —                                       |
 | DELETE | `/students/:id`   | Bearer + Admin/Teacher  | —                                       |
+| DELETE | `/students/reset-all` | Bearer + Admin       | —                                       |
+| POST   | `/employees`      | Bearer + Admin          | `{ name, division, position }`          |
+| GET    | `/employees`      | —                       | —                                       |
+| GET    | `/employees/:id`  | —                       | —                                       |
+| PATCH  | `/employees/:id`  | Bearer + Admin          | `{ name?, division?, position? }`       |
+| DELETE | `/employees/:id`  | Bearer + Admin          | —                                       |
 | POST   | `/packages`       | Bearer + Admin/Operator | `{ studentId, roomId, location, createdBy, notes?, photoUrl? }` |
 | GET    | `/packages`       | —                       | —                                       |
 | GET    | `/packages/:id`   | —                       | —                                       |

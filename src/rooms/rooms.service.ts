@@ -29,30 +29,30 @@ export class RoomsService {
   ) {}
 
   /**
-     * Mengeksekusi operasi create.
-     * @param createRoomDto Parameter input.
-     * @returns Hasil dari operasi create.
-     */
-    async create(createRoomDto: CreateRoomDto) {
+   * Mengeksekusi operasi create.
+   * @param createRoomDto Parameter input.
+   * @returns Hasil dari operasi create.
+   */
+  async create(createRoomDto: CreateRoomDto) {
     const room = new Room(createRoomDto);
     await this.entityManager.save(room);
     return room;
   }
 
   /**
-     * Mengeksekusi operasi findAll.
-     * @returns Hasil dari operasi findAll.
-     */
-    async findAll() {
+   * Mengeksekusi operasi findAll.
+   * @returns Hasil dari operasi findAll.
+   */
+  async findAll() {
     return this.roomRepository.find({ relations: { students: true } });
   }
 
   /**
-     * Mengeksekusi operasi findOne.
-     * @param id Parameter input.
-     * @returns Hasil dari operasi findOne.
-     */
-    async findOne(id: number) {
+   * Mengeksekusi operasi findOne.
+   * @param id Parameter input.
+   * @returns Hasil dari operasi findOne.
+   */
+  async findOne(id: number) {
     return this.roomRepository.findOne({
       where: { id },
       relations: { students: true },
@@ -60,12 +60,12 @@ export class RoomsService {
   }
 
   /**
-     * Mengeksekusi operasi update.
-     * @param id Parameter input.
-     * @param updateRoomDto Parameter input.
-     * @returns Hasil dari operasi update.
-     */
-    async update(id: number, updateRoomDto: UpdateRoomDto) {
+   * Mengeksekusi operasi update.
+   * @param id Parameter input.
+   * @param updateRoomDto Parameter input.
+   * @returns Hasil dari operasi update.
+   */
+  async update(id: number, updateRoomDto: UpdateRoomDto) {
     const room = await this.roomRepository.findOneBy({ id });
 
     if (!room) {
@@ -77,11 +77,11 @@ export class RoomsService {
   }
 
   /**
-     * Mengeksekusi operasi remove.
-     * @param id Parameter input.
-     * @returns Hasil dari operasi remove.
-     */
-    async remove(id: number) {
+   * Mengeksekusi operasi remove.
+   * @param id Parameter input.
+   * @returns Hasil dari operasi remove.
+   */
+  async remove(id: number) {
     const room = await this.roomRepository.findOneBy({ id });
     if (!room) {
       throw new NotFoundException(`Room with ID ${id} not found`);

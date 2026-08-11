@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { AuthModule } from './auth/auth.module';
 import { StudentsModule } from './students/students.module';
+import { EmployeesModule } from './employees/employees.module';
 
 /** Kelas AppModule adalah modul fitur. */
 @Module({
@@ -21,6 +22,7 @@ import { StudentsModule } from './students/students.module';
     RoomsModule,
     AuthModule,
     StudentsModule,
+    EmployeesModule,
   ],
   controllers: [],
   providers: [],

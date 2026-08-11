@@ -32,11 +32,11 @@ export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
   /**
-     * Membuat data baru melalui operasi create.
-     * @param createStudentDto Parameter input.
-     * @returns Hasil dari operasi create.
-     */
-    @Roles(Role.ADMIN, Role.TEACHER)
+   * Membuat data baru melalui operasi create.
+   * @param createStudentDto Parameter input.
+   * @returns Hasil dari operasi create.
+   */
+  @Roles(Role.ADMIN, Role.TEACHER)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Post()
@@ -63,40 +63,40 @@ export class StudentsController {
   }
 
   /**
-     * Mengambil data melalui operasi findAll.
-     * @returns Hasil dari operasi findAll.
-     */
-    @Get()
+   * Mengambil data melalui operasi findAll.
+   * @returns Hasil dari operasi findAll.
+   */
+  @Get()
   async findAll() {
     return this.studentsService.findAll();
   }
 
   /**
-     * Mengambil data melalui operasi findArchived.
-     * @returns Hasil dari operasi findArchived.
-     */
-    @Get('archived')
+   * Mengambil data melalui operasi findArchived.
+   * @returns Hasil dari operasi findArchived.
+   */
+  @Get('archived')
   async findArchived() {
     return this.studentsService.findAllArchived();
   }
 
   /**
-     * Mengambil data melalui operasi findOne.
-     * @param id Parameter input.
-     * @returns Hasil dari operasi findOne.
-     */
-    @Get(':id')
+   * Mengambil data melalui operasi findOne.
+   * @param id Parameter input.
+   * @returns Hasil dari operasi findOne.
+   */
+  @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.studentsService.findOne(+id);
   }
 
   /**
-     * Memperbarui data melalui operasi update.
-     * @param id Parameter input.
-     * @param updateStudentDto Parameter input.
-     * @returns Hasil dari operasi update.
-     */
-    @Roles(Role.ADMIN, Role.TEACHER)
+   * Memperbarui data melalui operasi update.
+   * @param id Parameter input.
+   * @param updateStudentDto Parameter input.
+   * @returns Hasil dari operasi update.
+   */
+  @Roles(Role.ADMIN, Role.TEACHER)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Patch(':id')
@@ -117,11 +117,11 @@ export class StudentsController {
   }
 
   /**
-     * Menghapus data melalui operasi remove.
-     * @param id Parameter input.
-     * @returns Hasil dari operasi remove.
-     */
-    @Roles(Role.ADMIN, Role.TEACHER)
+   * Menghapus data melalui operasi remove.
+   * @param id Parameter input.
+   * @returns Hasil dari operasi remove.
+   */
+  @Roles(Role.ADMIN, Role.TEACHER)
   @UseGuards(RolesGuard)
   @UseGuards(PassportJwtGuard)
   @Delete(':id')

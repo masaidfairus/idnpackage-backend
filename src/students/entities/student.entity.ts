@@ -24,32 +24,32 @@ import { Package } from '../../packages/entities/package.entity';
 @Entity()
 export class Student {
   /** Properti id dengan tipe number. */
-    @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn()
   id!: number;
 
   /** Properti name dengan tipe string. */
-    @Column()
+  @Column()
   name: string;
 
   /** Properti nis dengan tipe string. */
-    @Column({ nullable: true })
+  @Column({ nullable: true })
   nis: string;
 
   /** Properti isActive dengan tipe boolean. */
-    @Column({ default: true })
+  @Column({ default: true })
   isActive: boolean;
 
   /** Properti roomId dengan tipe import("E:/Main/Code/idnpackage-backend/src/rooms/entities/room.entity").Room. */
-    @ManyToOne(() => Room, (room) => room.students)
+  @ManyToOne(() => Room, (room) => room.students)
   @JoinColumn({ name: 'roomId' })
   roomId: Room;
 
   /** Properti packages dengan tipe import("E:/Main/Code/idnpackage-backend/src/packages/entities/package.entity").Package[]. */
-    @OneToMany(() => Package, (studentPackage) => studentPackage.studentId)
+  @OneToMany(() => Package, (studentPackage) => studentPackage.studentId)
   packages: Package[];
 
   /** Properti createdAt dengan tipe Date. */
-    @CreateDateColumn()
+  @CreateDateColumn()
   createdAt: Date;
 
   constructor(student: Partial<Student>) {
