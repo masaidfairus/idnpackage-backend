@@ -5,7 +5,7 @@ import { IsDateString, IsOptional } from 'class-validator';
 /** Kelas UpdatePackageDto. */
 export class UpdatePackageDto extends PartialType(CreatePackageDto) {
   /** Properti pickedUpDate dengan tipe string | null | undefined. */
-    @IsOptional()
+  @IsOptional()
   @IsDateString()
   pickedUpDate?: string | null;
 }

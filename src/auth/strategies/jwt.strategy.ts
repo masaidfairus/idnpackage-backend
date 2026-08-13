@@ -27,6 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: {
     sub: string;
     name: string;
+    email?: string;
     roomId: number | null;
     role: string;
     tokenVersion?: number;
@@ -36,14 +37,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (!user || user.tokenVersion !== payload.tokenVersion) {
         throw new UnauthorizedException();
       }
-      // Gunakan role terbaru dari database
+      // Gunakan role & email terbaru dari database
       payload.role = user.role;
+      payload.email = user.email;
     }
 
     return {
       userId: payload.sub,
       roomId: payload.roomId,
       name: payload.name,
+      email: payload.email,
       role: payload.role,
     };
   }

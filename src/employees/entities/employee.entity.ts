@@ -1,7 +1,15 @@
 /**
  * Entitas Employee (karyawan/pegawai).
  */
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Package } from '../../packages/entities/package.entity';
 
 /** Kelas Employee adalah entitas database. */
 @Entity()
@@ -21,6 +29,17 @@ export class Employee {
   /** Properti position dengan tipe string | undefined. */
   @Column({ nullable: true })
   position?: string;
+
+  @OneToMany(() => Package, (employeePackage) => employeePackage.employeeId)
+  packages?: Package[];
+
+  /** Properti createdAt dengan tipe Date. */
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  /** Properti updatedAt dengan tipe Date. */
+  @UpdateDateColumn()
+  updatedAt!: Date;
 
   constructor(employee: Partial<Employee>) {
     Object.assign(this, employee);

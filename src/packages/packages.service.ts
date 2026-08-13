@@ -18,6 +18,7 @@ import { Package } from './entities/package.entity';
 import { Student } from '../students/entities/student.entity';
 import { Room } from '../rooms/entities/room.entity';
 import { User } from '../auth/entities/user.entity';
+import { Employee } from '../employees/entities/employee.entity';
 
 /** Kelas PackagesService menangani logika bisnis. */
 @Injectable()
@@ -26,6 +27,9 @@ export class PackagesService {
     @InjectRepository(Package)
     private readonly packageRepository: Repository<Package>,
     private readonly entityManager: EntityManager,
+
+    @InjectRepository(Employee)
+    private readonly employeeRepository: Repository<Employee>,
 
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
@@ -38,48 +42,85 @@ export class PackagesService {
   ) {}
 
   /**
-     * Mengeksekusi operasi create.
-     * @param createPackageDto Parameter input.
-     * @returns Hasil dari operasi create.
-     */
-    async create(createPackageDto: CreatePackageDto) {
-    const { studentId, roomId, createdBy, ...packageData } = createPackageDto;
-    const student = await this.studentRepository.findOne({
-      where: { id: studentId },
-    });
-
-    const room = await this.roomRepository.findOne({
-      where: { id: roomId },
-    });
+   * Mengeksekusi operasi create.
+   * @param createPackageDto Parameter input.
+   * @returns Hasil dari operasi create.
+   */
+  async create(createPackageDto: CreatePackageDto) {
+    const { employeeId, studentId, roomId, createdBy, ...packageData } =
+      createPackageDto;
 
     const operator = await this.userRepository.findOne({
       where: { id: createdBy },
     });
 
-    if (!student || !room || !operator) {
-      throw new NotFoundException(`Student, Room, or Operator ID does not exist.`);
+    if (!operator) {
+      throw new NotFoundException(`Operator ID does not exist.`);
     }
 
-    const newPackage = new Package({
-      studentId: student,
-      roomId: room,
-      receivedDate: new Date(),
-      createdBy: operator,
-      ...packageData,
-    });
+    if (employeeId) {
+      const employee = await this.employeeRepository.findOne({
+        where: { id: employeeId },
+      });
 
-    await this.entityManager.save(newPackage);
-    return newPackage;
+      // Fail-fast: jika employeeId dikirim tapi employee tidak ditemukan,
+      // langsung tolak request. Sebelumnya kode ini fall-through ke branch
+      // student, sehingga request dengan employeeId yang salah (typo) +
+      // studentId valid akan diam-diam membuat paket SISWA padahal client
+      // mengira membuat paket KARYAWAN. Menolak lebih aman daripada
+      // menyimpan data yang salah ke database.
+      if (!employee) {
+        throw new NotFoundException(
+          `Employee with ID ${employeeId} does not exist.`,
+        );
+      }
+
+      const newPackage = new Package({
+        employeeId: employee,
+        receivedDate: new Date(),
+        createdBy: operator,
+        ...packageData,
+      });
+
+      await this.entityManager.save(newPackage);
+      return newPackage;
+    }
+
+    if (studentId && roomId) {
+      const student = await this.studentRepository.findOne({
+        where: { id: studentId },
+      });
+
+      const room = await this.roomRepository.findOne({
+        where: { id: roomId },
+      });
+
+      if (student && room) {
+        const newPackage = new Package({
+          studentId: student,
+          roomId: room,
+          receivedDate: new Date(),
+          createdBy: operator,
+          ...packageData,
+        });
+
+        await this.entityManager.save(newPackage);
+        return newPackage;
+      }
+    }
+
+    throw new NotFoundException(`Employee & Student does not exist.`);
   }
 
   /**
-     * Mengeksekusi operasi findAll.
-     * @returns Hasil dari operasi findAll.
-     */
-    async findAll() {
+   * Mengeksekusi operasi findAll.
+   * @returns Hasil dari operasi findAll.
+   */
+  async findAll() {
     return this.packageRepository.find({
       relations: {
         studentId: true,
+        employeeId: true,
         roomId: true,
         createdBy: true,
       },
@@ -87,15 +128,16 @@ export class PackagesService {
   }
 
   /**
-     * Mengeksekusi operasi findOne.
-     * @param id Parameter input.
-     * @returns Hasil dari operasi findOne.
-     */
-    async findOne(id: number) {
+   * Mengeksekusi operasi findOne.
+   * @param id Parameter input.
+   * @returns Hasil dari operasi findOne.
+   */
+  async findOne(id: number) {
     return this.packageRepository.findOne({
       where: { id },
       relations: {
         studentId: true,
+        employeeId: true,
         roomId: true,
         createdBy: true,
       },
@@ -103,24 +145,47 @@ export class PackagesService {
   }
 
   /**
-     * Mengeksekusi operasi update.
-     * @param id Parameter input.
-     * @param updatePackageDto Parameter input.
-     * @returns Hasil dari operasi update.
-     */
-    async update(id: number, updatePackageDto: UpdatePackageDto) {
-    const studentPackage = await this.packageRepository.findOne({
+   * Mengeksekusi operasi update.
+   * @param id Parameter input.
+   * @param updatePackageDto Parameter input.
+   * @returns Hasil dari operasi update.
+   */
+  async update(id: number, updatePackageDto: UpdatePackageDto) {
+    const userPackage = await this.packageRepository.findOne({
       where: { id },
-      relations: { studentId: true, roomId: true, createdBy: true },
+      relations: {
+        employeeId: true,
+        studentId: true,
+        roomId: true,
+        createdBy: true,
+      },
     });
 
-    if (!studentPackage) {
+    if (!userPackage) {
       throw new NotFoundException(`Package with ID ${id} not found`);
     }
 
-    const { studentId, roomId, createdBy, ...packageData } = updatePackageDto;
+    const { employeeId, studentId, roomId, createdBy, ...packageData } =
+      updatePackageDto;
 
-    Object.assign(studentPackage, packageData);
+    Object.assign(userPackage, packageData);
+
+    if (employeeId) {
+      const employee = await this.employeeRepository.findOne({
+        where: { id: employeeId },
+      });
+      // Perbaikan copy-paste: pesan error sebelumnya menyalin dari branch
+      // student ("Student with ID ${studentId}"), padahal di sini yang
+      // divalidasi adalah employeeId, sehingga pesan yang keluar menjadi
+      // "Student with ID undefined does not exist." — menyesatkan client.
+      // Sekarang pesan menyebutkan employeeId yang sebenarnya diverifikasi.
+      if (!employee) {
+        throw new NotFoundException(
+          `Employee with ID ${employeeId} does not exist.`,
+        );
+      }
+      userPackage.employeeId = employee;
+    }
 
     if (studentId) {
       const student = await this.studentRepository.findOne({
@@ -131,7 +196,7 @@ export class PackagesService {
           `Student with ID ${studentId} does not exist.`,
         );
       }
-      studentPackage.studentId = student;
+      userPackage.studentId = student;
     }
 
     if (roomId) {
@@ -139,7 +204,7 @@ export class PackagesService {
       if (!room) {
         throw new NotFoundException(`Room with ID ${roomId} does not exist.`);
       }
-      studentPackage.roomId = room;
+      userPackage.roomId = room;
     }
 
     if (createdBy) {
@@ -151,10 +216,10 @@ export class PackagesService {
           `User with ID ${createdBy} does not exist.`,
         );
       }
-      studentPackage.createdBy = operator;
+      userPackage.createdBy = operator;
     }
 
-    return this.entityManager.save(studentPackage);
+    return this.entityManager.save(userPackage);
   }
 
   /**
@@ -172,27 +237,29 @@ export class PackagesService {
       throw new NotFoundException(`Package with ID ${id} not found`);
     }
 
-    if (studentPackage.location === 'taken') {
+    if (studentPackage.location === PackageLocation.TAKEN) {
       // Batalkan: kembalikan ke lokasi sebelumnya (atau security_post jika tidak ada)
-      studentPackage.location = (studentPackage.previousLocation as PackageLocation) || PackageLocation.SECURITY;
+      studentPackage.location =
+        (studentPackage.previousLocation as PackageLocation) ||
+        PackageLocation.SECURITY;
       studentPackage.previousLocation = null;
       studentPackage.pickedUpDate = null;
     } else {
       // Tandai sebagai diterima: simpan lokasi saat ini dulu
       studentPackage.previousLocation = studentPackage.location;
       studentPackage.location = PackageLocation.TAKEN;
-      studentPackage.pickedUpDate = new Date() as any;
+      studentPackage.pickedUpDate = new Date();
     }
 
     return this.entityManager.save(studentPackage);
   }
 
   /**
-     * Mengeksekusi operasi remove.
-     * @param id Parameter input.
-     * @returns Hasil dari operasi remove.
-     */
-    async remove(id: number) {
+   * Mengeksekusi operasi remove.
+   * @param id Parameter input.
+   * @returns Hasil dari operasi remove.
+   */
+  async remove(id: number) {
     return this.packageRepository.delete(id);
   }
 }

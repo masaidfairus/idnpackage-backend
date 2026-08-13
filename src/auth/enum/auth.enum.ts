@@ -5,6 +5,7 @@ export type AuthInput = { email: string; password: string };
 export type SignInData = {
   userId: number;
   name: string;
+  email: string;
   role: string;
   roomId: number | null;
   roomName: string | null;

@@ -11,10 +11,11 @@ import { Package } from './entities/package.entity';
 import { Student } from '../students/entities/student.entity';
 import { Room } from '../rooms/entities/room.entity';
 import { User } from '../auth/entities/user.entity';
+import { Employee } from '../employees/entities/employee.entity';
 
 /** Kelas PackagesModule adalah modul fitur. */
 @Module({
-  imports: [TypeOrmModule.forFeature([Package, Student, Room, User])],
+  imports: [TypeOrmModule.forFeature([Package, Student, Room, User, Employee])],
   controllers: [PackagesController],
   providers: [PackagesService],
 })

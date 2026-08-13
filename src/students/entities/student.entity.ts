@@ -40,13 +40,13 @@ export class Student {
   isActive: boolean;
 
   /** Properti roomId dengan tipe import("E:/Main/Code/idnpackage-backend/src/rooms/entities/room.entity").Room. */
-  @ManyToOne(() => Room, (room) => room.students)
+  @ManyToOne(() => Room, (room) => room.students, { nullable: true })
   @JoinColumn({ name: 'roomId' })
   roomId: Room;
 
   /** Properti packages dengan tipe import("E:/Main/Code/idnpackage-backend/src/packages/entities/package.entity").Package[]. */
   @OneToMany(() => Package, (studentPackage) => studentPackage.studentId)
-  packages: Package[];
+  packages?: Package[];
 
   /** Properti createdAt dengan tipe Date. */
   @CreateDateColumn()

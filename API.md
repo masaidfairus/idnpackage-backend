@@ -102,6 +102,7 @@ Requires `Authorization: Bearer <token>` header.
 {
   "userId": 12,
   "name": "Masaid Fairus",
+  "email": "masaid@example.com",
   "role": "admin",
   "tokenVersion": 1
 }
@@ -129,6 +130,7 @@ Same as v1 but uses Passport. Same body, same response shape.
   "accessToken": "eyJhbGciOiJIUzI1NiIs...",
   "userId": 12,
   "name": "Masaid Fairus",
+  "email": "masaid@example.com",
   "role": "admin",
   "tokenVersion": 1
 }
@@ -160,6 +162,7 @@ Requires `Authorization: Bearer <token>` header.
 {
   "userId": 12,
   "name": "Masaid Fairus",
+  "email": "masaid@example.com",
   "role": "admin",
   "tokenVersion": 1
 }

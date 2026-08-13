@@ -13,6 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Room } from './entities/room.entity';
 import { Student } from '../students/entities/student.entity';
 import { Package } from '../packages/entities/package.entity';
+import { User } from '../auth/entities/user.entity';
 import { EntityManager, Repository } from 'typeorm';
 
 /** Kelas RoomsService menangani logika bisnis. */
@@ -25,6 +26,8 @@ export class RoomsService {
     private readonly studentRepository: Repository<Student>,
     @InjectRepository(Package)
     private readonly packageRepository: Repository<Package>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly entityManager: EntityManager,
   ) {}
 
@@ -100,6 +103,17 @@ export class RoomsService {
       .createQueryBuilder()
       .update()
       .set({ roomId: null as any })
+      .where('roomId = :id', { id })
+      .execute();
+
+    // Lepas FK user.roomId juga. Sebelumnya hanya student dan package yang
+    // di-null-kan, sehingga menghapus kamar yang masih dipakai user akan
+    // gagal dengan MySQL foreign key constraint error (1451). Dengan
+    // me-null-kan roomId user terlebih dahulu, penghapusan kamar selalu aman.
+    await this.userRepository
+      .createQueryBuilder()
+      .update()
+      .set({ roomId: null })
       .where('roomId = :id', { id })
       .execute();
 

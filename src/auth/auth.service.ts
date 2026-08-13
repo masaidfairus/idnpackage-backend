@@ -55,6 +55,7 @@ export class AuthService {
       return {
         userId: user.id,
         name: user.name,
+        email: user.email,
         role: user.role,
         roomId: user.room?.id ?? null,
         roomName: user.room?.name ?? null,
@@ -74,6 +75,7 @@ export class AuthService {
     const tokenPayload = {
       sub: user.userId,
       name: user.name,
+      email: user.email,
       role: user.role,
       roomId: user.roomId,
       roomName: user.roomName,
@@ -86,6 +88,7 @@ export class AuthService {
       accessToken,
       userId: user.userId,
       name: user.name,
+      email: user.email,
       role: user.role,
       roomId: user.roomId,
       roomName: user.roomName,

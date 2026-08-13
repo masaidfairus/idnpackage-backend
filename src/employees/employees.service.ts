@@ -12,6 +12,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
+import { Package } from '../packages/entities/package.entity';
 import { EntityManager, Repository } from 'typeorm';
 
 /** Kelas EmployeesService menangani logika bisnis. */
@@ -20,6 +21,8 @@ export class EmployeesService {
   constructor(
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
+    @InjectRepository(Package)
+    private readonly packageRepository: Repository<Package>,
     private readonly entityManager: EntityManager,
   ) {}
 
@@ -81,6 +84,17 @@ export class EmployeesService {
     if (!employee) {
       throw new NotFoundException(`Employee with ID ${id} not found`);
     }
+
+    // Lepas FK package.employeeId sebelum menghapus employee. Tanpa ini,
+    // menghapus employee yang masih memiliki paket akan gagal dengan MySQL
+    // foreign key constraint error (1451). Konsisten dengan RoomsService
+    // yang me-null-kan FK terlebih dahulu sebelum delete.
+    await this.packageRepository
+      .createQueryBuilder()
+      .update()
+      .set({ employeeId: null as any })
+      .where('employeeId = :id', { id })
+      .execute();
 
     return this.employeeRepository.delete(id);
   }
