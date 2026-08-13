@@ -47,7 +47,7 @@ export class PackagesService {
    * @returns Hasil dari operasi create.
    */
   async create(createPackageDto: CreatePackageDto) {
-    const { employeeId, studentId, roomId, createdBy, ...packageData } =
+    const { employeeId, studentId, roomId, createdBy, manualName, ...packageData } =
       createPackageDto;
 
     const operator = await this.userRepository.findOne({
@@ -109,6 +109,17 @@ export class PackagesService {
       }
     }
 
+    if (manualName) {
+      const newPackage = new Package({
+        manualName,
+        receivedDate: new Date(),
+        createdBy: operator,
+        ...packageData,
+      });
+      await this.entityManager.save(newPackage);
+      return newPackage;
+    }
+
     throw new NotFoundException(`Employee & Student does not exist.`);
   }
 
@@ -165,10 +176,13 @@ export class PackagesService {
       throw new NotFoundException(`Package with ID ${id} not found`);
     }
 
-    const { employeeId, studentId, roomId, createdBy, ...packageData } =
+    const { employeeId, studentId, roomId, createdBy, manualName, ...packageData } =
       updatePackageDto;
 
     Object.assign(userPackage, packageData);
+    if (manualName !== undefined) {
+      userPackage.manualName = manualName;
+    }
 
     if (employeeId) {
       const employee = await this.employeeRepository.findOne({

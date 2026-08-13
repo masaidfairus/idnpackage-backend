@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 /** Kelas CreateStudentDto. */
 export class CreateStudentDto {
@@ -7,10 +7,10 @@ export class CreateStudentDto {
   @IsNotEmpty()
   name!: string;
 
-  /** Properti nis dengan tipe string. */
+  /** Properti nis dengan tipe string, opsional. */
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  nis!: string;
+  nis?: string;
 
   /** Properti roomId dengan tipe number. */
   @IsNumber()

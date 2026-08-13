@@ -10,6 +10,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { CreateBulkEmployeeDto } from './dto/create-bulk-employee.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Employee } from './entities/employee.entity';
 import { Package } from '../packages/entities/package.entity';
@@ -35,6 +36,52 @@ export class EmployeesService {
     const employee = new Employee(createEmployeeDto);
     await this.entityManager.save(employee);
     return employee;
+  }
+
+  /**
+   * Bulk Sync untuk Staff/Guru
+   */
+  async bulkSync(createBulkDto: CreateBulkEmployeeDto) {
+    const added: Employee[] = [];
+    const updated: string[] = [];
+    const skipped: string[] = [];
+
+    for (const empData of createBulkDto.employees) {
+      const existing = await this.employeeRepository.findOne({
+        where: { name: empData.name },
+      });
+
+      if (existing) {
+        if (
+          existing.division !== empData.division ||
+          existing.position !== empData.position
+        ) {
+          existing.division = empData.division;
+          if (empData.position !== undefined) {
+            existing.position = empData.position;
+          }
+          await this.entityManager.save(existing);
+          updated.push(existing.name);
+        } else {
+          skipped.push(existing.name);
+        }
+      } else {
+        const newEmployee = new Employee({
+          name: empData.name,
+          division: empData.division,
+          position: empData.position,
+        });
+        await this.entityManager.save(newEmployee);
+        added.push(newEmployee);
+      }
+    }
+
+    return {
+      added: added.length,
+      updated: updated.length,
+      skipped: skipped.length,
+      details: { added: added.map((e) => e.name), updated, skipped },
+    };
   }
 
   /**

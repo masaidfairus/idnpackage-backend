@@ -18,6 +18,7 @@ import {
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { CreateBulkEmployeeDto } from './dto/create-bulk-employee.dto';
 import { Roles } from '../auth/decorator/roles.decorator';
 import { Role } from '../auth/enum/role.enum';
 import { RolesGuard } from '../auth/guards/roles/roles.guard';
@@ -39,6 +40,14 @@ export class EmployeesController {
   @Post()
   async create(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.employeesService.create(createEmployeeDto);
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(RolesGuard)
+  @UseGuards(PassportJwtGuard)
+  @Post('bulk')
+  async createBulk(@Body() createBulkDto: CreateBulkEmployeeDto) {
+    return this.employeesService.bulkSync(createBulkDto);
   }
 
   /**

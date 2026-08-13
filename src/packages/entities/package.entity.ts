@@ -45,6 +45,10 @@ export class Package {
   @JoinColumn({ name: 'employeeId' })
   employeeId: Employee;
 
+  /** Properti manualName dengan tipe string | null. */
+  @Column({ type: 'varchar', nullable: true })
+  manualName: string | null;
+
   /** Properti roomId dengan tipe import("E:/Main/Code/idnpackage-backend/src/rooms/entities/room.entity").Room. */
   @ManyToOne(() => Room, (room) => room.packages, { nullable: true })
   @JoinColumn({ name: 'roomId' })

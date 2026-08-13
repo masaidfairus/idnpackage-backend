@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 /** Kelas CreateEmployeeDto. */
 export class CreateEmployeeDto {
@@ -12,7 +12,8 @@ export class CreateEmployeeDto {
   @IsNotEmpty()
   division!: string;
 
-  /** Properti position dengan tipe string. */
+  /** Properti position dengan tipe string, opsional. */
+  @IsOptional()
   @IsString()
-  position!: string;
+  position?: string;
 }

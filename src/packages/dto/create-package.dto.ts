@@ -14,6 +14,10 @@ export class CreatePackageDto {
   @IsOptional()
   employeeId!: number;
 
+  @IsString()
+  @IsOptional()
+  manualName?: string;
+
   @IsNumber()
   @IsOptional()
   studentId!: number;
