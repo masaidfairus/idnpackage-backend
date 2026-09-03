@@ -16,12 +16,33 @@ import { json, urlencoded } from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const allowedOrigins: (string | RegExp)[] = [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    // Vercel production domain (set CORS_ORIGIN env var in Railway to override)
+    ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
+    // Allow ALL Vercel preview deployments for this project
+    /^https:\/\/idnpackage-.*\.vercel\.app$/,
+    /^https:\/\/idnpackage-.*\.projects\.vercel\.app$/,
+  ];
+
   app.enableCors({
-  origin: true,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-});
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. curl, Postman, server-to-server)
+      if (!origin) return callback(null, true);
+      const isAllowed = allowedOrigins.some((o) =>
+        o instanceof RegExp ? o.test(origin) : o === origin,
+      );
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origin '${origin}' not allowed`));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
