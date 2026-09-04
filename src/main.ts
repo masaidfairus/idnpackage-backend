@@ -19,6 +19,7 @@ async function bootstrap() {
   const allowedOrigins: (string | RegExp)[] = [
     'http://localhost:3000',
     'http://localhost:5173',
+    'https://idnpackage.vercel.app',
     // Vercel production domain (set CORS_ORIGIN env var in Railway to override)
     ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
     // Allow ALL Vercel preview deployments for this project
